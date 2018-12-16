@@ -6,7 +6,7 @@ class ValidateConfig(object):
     def validate(data):
         # Validate that mandatory input parameters were found
         for paramName in ['inputDataFile', 'solutionFile', 'solver']:
-            if(not data.__dict__.has_key(paramName)):
+            if(paramName not in data.__dict__):
                 raise Exception('Parameter/Set(%s) not contained in Configuration' % str(paramName))
 
         # Validate input data file
@@ -23,7 +23,7 @@ class ValidateConfig(object):
         
         # Validate verbose
         verbose = False
-        if(data.__dict__.has_key('verbose')):
+        if('verbose' in data.__dict__):
             verbose = data.verbose
             if(not isinstance(verbose, (bool)) or (verbose not in [True, False])):
                 raise Exception('verbose(%s) has to be a boolean value.' % str(verbose))
@@ -35,7 +35,7 @@ class ValidateConfig(object):
         if(solver == 'Greedy'):
             # Validate that mandatory input parameters for Greedy solver were found
             for paramName in ['localSearch']:
-                if(not data.__dict__.has_key(paramName)):
+                if( paramName not in data.__dict__):
                     raise Exception('Parameter/Set(%s) not contained in Configuration. Required by Greedy solver.' % str(paramName))
 
             # Validate localSearch
@@ -46,17 +46,17 @@ class ValidateConfig(object):
         elif(solver == 'GRASP'):
             # Validate that mandatory input parameters for GRASP solver were found
             for paramName in ['maxExecTime', 'alpha', 'localSearch']:
-                if(not data.__dict__.has_key(paramName)):
+                if( paramName not in data.__dict__):
                     raise Exception('Parameter/Set(%s) not contained in Configuration. Required by GRASP solver.' % str(paramName))
 
             # Validate maxExecTime
             maxExecTime = data.maxExecTime
-            if(not isinstance(maxExecTime, (int, long, float)) or (maxExecTime <= 0)):
+            if(not isinstance(maxExecTime, (int, float)) or (maxExecTime <= 0)):
                 raise Exception('maxExecTime(%s) has to be a positive float value.' % str(maxExecTime))
 
             # Validate alpha
             alpha = data.alpha
-            if(not isinstance(alpha, (int, long, float)) or (alpha < 0) or (alpha > 1)):
+            if(not isinstance(alpha, (int, float)) or (alpha < 0) or (alpha > 1)):
                 raise Exception('alpha(%s) has to be a float value in range [0, 1].' % str(alpha))
 
             # Validate localSearch
@@ -70,7 +70,7 @@ class ValidateConfig(object):
         if(data.localSearch):
             # Validate that mandatory input parameters for local search were found
             for paramName in ['neighborhoodStrategy', 'policy']:
-                if(not data.__dict__.has_key(paramName)):
+                if( paramName not in data.__dict__):
                     raise Exception('Parameter/Set(%s) not contained in Configuration. Required by Local Search.' % str(paramName))
 
             # Validate neighborhoodStrategy

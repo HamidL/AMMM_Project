@@ -7,7 +7,7 @@ class ValidateInputData(object):
     def validate(data):
         # Validate that all input parameters were found
         for paramName in ['nServices', 'nDrivers', 'nBuses', 'maxBuses', 'BM', 'CBM', 'CEM', 'ST', 'DM', 'DK', 'NP', 'cap', 'eurosMin', 'eurosKm', 'maxD']:
-            if(not data.__dict__.has_key(paramName)):
+            if(paramName not in data.__dict__):
                 raise Exception('Parameter/Set(%s) not contained in Input Data' % str(paramName))
 
         # Validate nServices
@@ -38,12 +38,12 @@ class ValidateInputData(object):
         # Validate CBM
         CBM = data.CBM
         if (not isinstance(CBM, (int,float)) or (CBM <= 0)):
-            raise Exception('CBM(%s) has to be a positive integer value.' % str(CBM))
+            raise Exception('CBM(%s) has to be a positive float value.' % str(CBM))
 
         # Validate CEM
         CEM = data.CEM
         if (not isinstance(CEM, (int, float)) or (CEM <= 0)):
-            raise Exception('CEM(%s) has to be a positive integer value.' % str(CEM))
+            raise Exception('CEM(%s) has to be a positive float value.' % str(CEM))
 
         # Validate ST
         ST = data.ST
@@ -52,7 +52,7 @@ class ValidateInputData(object):
 
         for value in ST:
             if(not isinstance(value, int) or (value < 0)):
-                raise Exception('Invalid parameter value(%s) in rh. Should be a float greater or equal than zero.' % str(value))
+                raise Exception('Invalid parameter value(%s) in ST. Should be a float greater or equal than zero.' % str(value))
 
         # Validate DM
         DM = data.DM
@@ -61,7 +61,7 @@ class ValidateInputData(object):
 
         for value in DM:
             if(not isinstance(value, int) or (value < 0)):
-                raise Exception('Invalid parameter value(%s) in rh. Should be a float greater or equal than zero.' % str(value))
+                raise Exception('Invalid parameter value(%s) in DM. Should be a float greater or equal than zero.' % str(value))
 
         # Validate DK
         DK = data.DK
@@ -70,7 +70,7 @@ class ValidateInputData(object):
 
         for value in DK:
             if(not isinstance(value, int) or (value < 0)):
-                raise Exception('Invalid parameter value(%s) in rh. Should be a float greater or equal than zero.' % str(value))
+                raise Exception('Invalid parameter value(%s) in DK. Should be an integer greater or equal than zero.' % str(value))
 
         # Validate NP
         NP = data.NP
@@ -79,44 +79,44 @@ class ValidateInputData(object):
 
         for value in NP:
             if(not isinstance(value, int) or (value < 0)):
-                raise Exception('Invalid parameter value(%s) in rh. Should be a float greater or equal than zero.' % str(value))
+                raise Exception('Invalid parameter value(%s) in NP. Should be an integer greater or equal than zero.' % str(value))
 
         # Validate cap
         cap = data.cap
-        if (len(cap) != nServices):
+        if (len(cap) != nBuses):
             raise Exception('Size of cap(%d) does not match with value of nThreads(%d).' % (len(cap), nBuses))
 
         for value in cap:
             if (not isinstance(value, int) or (value < 0)):
                 raise Exception(
-                    'Invalid parameter value(%s) in rh. Should be a float greater or equal than zero.' % str(value))
+                    'Invalid parameter value(%s) in cap. Should be an integer greater or equal than zero.' % str(value))
 
         # Validate eurosMin
         eurosMin = data.eurosMin
-        if (len(eurosMin) != nServices):
+        if (len(eurosMin) != nBuses):
             raise Exception('Size of eurosMin(%d) does not match with value of nThreads(%d).' % (len(eurosMin), nBuses))
 
         for value in eurosMin:
             if (not isinstance(value, float) or (value < 0)):
                 raise Exception(
-                    'Invalid parameter value(%s) in rh. Should be a float greater or equal than zero.' % str(value))
+                    'Invalid parameter value(%s) in eurosMin. Should be a float greater or equal than zero.' % str(value))
             
         # Validate eurosKm
         eurosKm = data.eurosKm
-        if (len(eurosKm) != nServices):
+        if (len(eurosKm) != nBuses):
             raise Exception('Size of eurosKm(%d) does not match with value of nThreads(%d).' % (len(eurosKm), nBuses))
 
         for value in eurosKm:
             if (not isinstance(value, float) or (value < 0)):
                 raise Exception(
-                    'Invalid parameter value(%s) in rh. Should be a float greater or equal than zero.' % str(value))
+                    'Invalid parameter value(%s) in eurosKm. Should be a float greater or equal than zero.' % str(value))
             
         # Validate maxD
         maxD = data.maxD
         if (len(maxD) != nDrivers):
-            raise Exception('Size of maxD(%d) does not match with value of nThreads(%d).' % (len(maxD), nBuses))
+            raise Exception('Size of maxD(%d) does not match with value of nThreads(%d).' % (len(maxD), nDrivers))
 
         for value in maxD:
-            if (not isinstance(value, float) or (value < 0)):
+            if (not isinstance(value, int) or (value < 0)):
                 raise Exception(
-                    'Invalid parameter value(%s) in rh. Should be a float greater or equal than zero.' % str(value))
+                    'Invalid parameter value(%s) in maxD. Should be an integer greater or equal than zero.' % str(value))
