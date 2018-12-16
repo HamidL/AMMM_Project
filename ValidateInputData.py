@@ -10,66 +10,113 @@ class ValidateInputData(object):
             if(not data.__dict__.has_key(paramName)):
                 raise Exception('Parameter/Set(%s) not contained in Input Data' % str(paramName))
 
-        # Validate nTasks
-        nTasks = data.nTasks
-        if(not isinstance(nTasks, (int, long)) or (nTasks <= 0)):
-            raise Exception('nTasks(%s) has to be a positive integer value.' % str(nTasks))
+        # Validate nServices
+        nServices = data.nServices
+        if(not isinstance(nServices, int) or (nServices <= 0)):
+            raise Exception('nServices(%s) has to be a positive integer value.' % str(nServices))
         
-        # Validate nThreads
-        nThreads = data.nThreads
-        if(not isinstance(nThreads, (int, long)) or (nThreads <= 0)):
-            raise Exception('nThreads(%s) has to be a positive integer value.' % str(nThreads))
-        
-        # Validate nCPUs
-        nCPUs = data.nCPUs
-        if(not isinstance(nCPUs, (int, long)) or (nCPUs <= 0)):
-            raise Exception('nCPUs(%s) has to be a positive integer value.' % str(nCPUs))
-        
-        # Validate nCores
-        nCores = data.nCores
-        if(not isinstance(nCores, (int, long)) or (nCores <= 0)):
-            raise Exception('nCores(%s) has to be a positive integer value.' % str(nCores))
-        
-        # Validate rh
-        rh = data.rh
-        if(len(rh) != nThreads):
-            raise Exception('Size of rh(%d) does not match with value of nThreads(%d).' % (len(rh), nThreads))
-        
-        for value in rh:
-            if(not isinstance(value, (int, long, float)) or (value < 0)):
+        # Validate nDrivers
+        nDrivers = data.nDrivers
+        if(not isinstance(nDrivers, int) or (nDrivers <= 0)):
+            raise Exception('nDrivers(%s) has to be a positive integer value.' % str(nDrivers))
+
+        # Validate nBuses
+        nBuses = data.nBuses
+        if (not isinstance(nBuses, int) or (nBuses <= 0)):
+            raise Exception('nBuses(%s) has to be a positive integer value.' % str(nBuses))
+
+        # Validate maxBuses
+        maxBuses = data.maxBuses
+        if (not isinstance(maxBuses, int) or (maxBuses <= 0)):
+            raise Exception('maxBuses(%s) has to be a positive integer value.' % str(maxBuses))
+
+        # Validate BM
+        BM = data.BM
+        if(not isinstance(BM, int) or (BM <= 0)):
+            raise Exception('BM(%s) has to be a positive integer value.' % str(BM))
+
+        # Validate CBM
+        CBM = data.CBM
+        if (not isinstance(CBM, (int,float)) or (CBM <= 0)):
+            raise Exception('CBM(%s) has to be a positive integer value.' % str(CBM))
+
+        # Validate CEM
+        CEM = data.CEM
+        if (not isinstance(CEM, (int, float)) or (CEM <= 0)):
+            raise Exception('CEM(%s) has to be a positive integer value.' % str(CEM))
+
+        # Validate ST
+        ST = data.ST
+        if (len(ST) != nServices):
+            raise Exception('Size of ST(%d) does not match with value of nThreads(%d).' % (len(ST), nServices))
+
+        for value in ST:
+            if(not isinstance(value, int) or (value < 0)):
                 raise Exception('Invalid parameter value(%s) in rh. Should be a float greater or equal than zero.' % str(value))
-        
-        # Validate rc
-        rc = data.rc
-        if(len(rc) != nCPUs):
-            raise Exception('Size of rc(%d) does not match with value of nCPUs(%d).' % (len(rc), nCPUs))
-        
-        for value in rc:
-            if(not isinstance(value, (int, long, float)) or (value < 0)):
-                raise Exception('Invalid parameter value(%s) in rc. Should be a float greater or equal than zero.' % str(value))
-        
-        # Validate CK
-        CK = data.CK
-        if(len(CK) != nCPUs):
-            raise Exception('Size of first dimension of CK(%d) does not match with value of nCPUs(%d).' % (len(CK), nCPUs))
-        
-        for ckEntry in CK:
-            if(len(ckEntry) != nCores):
-                raise Exception('Size of second dimension of CK(%d) does not match with value of nCores(%d).' % (len(ckEntry), nCores))
+
+        # Validate DM
+        DM = data.DM
+        if (len(DM) != nServices):
+            raise Exception('Size of DM(%d) does not match with value of nThreads(%d).' % (len(DM), nServices))
+
+        for value in DM:
+            if(not isinstance(value, int) or (value < 0)):
+                raise Exception('Invalid parameter value(%s) in rh. Should be a float greater or equal than zero.' % str(value))
+
+        # Validate DK
+        DK = data.DK
+        if (len(DK) != nServices):
+            raise Exception('Size of DK(%d) does not match with value of nThreads(%d).' % (len(DK), nServices))
+
+        for value in DK:
+            if(not isinstance(value, int) or (value < 0)):
+                raise Exception('Invalid parameter value(%s) in rh. Should be a float greater or equal than zero.' % str(value))
+
+        # Validate NP
+        NP = data.NP
+        if (len(NP) != nServices):
+            raise Exception('Size of NP(%d) does not match with value of nThreads(%d).' % (len(NP), nServices))
+
+        for value in NP:
+            if(not isinstance(value, int) or (value < 0)):
+                raise Exception('Invalid parameter value(%s) in rh. Should be a float greater or equal than zero.' % str(value))
+
+        # Validate cap
+        cap = data.cap
+        if (len(cap) != nServices):
+            raise Exception('Size of cap(%d) does not match with value of nThreads(%d).' % (len(cap), nBuses))
+
+        for value in cap:
+            if (not isinstance(value, int) or (value < 0)):
+                raise Exception(
+                    'Invalid parameter value(%s) in rh. Should be a float greater or equal than zero.' % str(value))
+
+        # Validate eurosMin
+        eurosMin = data.eurosMin
+        if (len(eurosMin) != nServices):
+            raise Exception('Size of eurosMin(%d) does not match with value of nThreads(%d).' % (len(eurosMin), nBuses))
+
+        for value in eurosMin:
+            if (not isinstance(value, float) or (value < 0)):
+                raise Exception(
+                    'Invalid parameter value(%s) in rh. Should be a float greater or equal than zero.' % str(value))
             
-            for value in ckEntry:
-                if(value not in [0, 1]):
-                    raise Exception('Invalid parameter value(%s) in CK. Should be an integer value [0, 1].' % str(value))
+        # Validate eurosKm
+        eurosKm = data.eurosKm
+        if (len(eurosKm) != nServices):
+            raise Exception('Size of eurosKm(%d) does not match with value of nThreads(%d).' % (len(eurosKm), nBuses))
 
-        # Validate TH
-        TH = data.TH
-        if(len(TH) != nTasks):
-            raise Exception('Size of first dimension of TH(%d) does not match with value of nTasks(%d).' % (len(TH), nTasks))
-        
-        for thEntry in TH:
-            if(len(thEntry) != nThreads):
-                raise Exception('Size of second dimension of TH(%d) does not match with value of nThreads(%d).' % (len(thEntry), nThreads))
+        for value in eurosKm:
+            if (not isinstance(value, float) or (value < 0)):
+                raise Exception(
+                    'Invalid parameter value(%s) in rh. Should be a float greater or equal than zero.' % str(value))
+            
+        # Validate maxD
+        maxD = data.maxD
+        if (len(maxD) != nDrivers):
+            raise Exception('Size of maxD(%d) does not match with value of nThreads(%d).' % (len(maxD), nBuses))
 
-            for value in thEntry:
-                if(value not in [0, 1]):
-                    raise Exception('Invalid parameter value(%s) in TH. Should be an integer value [0, 1].' % str(value))
+        for value in maxD:
+            if (not isinstance(value, float) or (value < 0)):
+                raise Exception(
+                    'Invalid parameter value(%s) in rh. Should be a float greater or equal than zero.' % str(value))

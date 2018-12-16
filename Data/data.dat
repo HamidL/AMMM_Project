@@ -1,0 +1,21 @@
+nServices=4;
+nDrivers=3;
+nBuses=3;
+maxBuses=3;
+BM = 50;
+CBM=0.33;
+CEM=0.7;
+
+//Services
+ST=[0 60 120 180];
+DM=[65 45 50 35];
+DK=[10 7 8 6];
+NP=[40 10 10 10];
+
+//Buses
+cap=[20 20 20];
+eurosMin=[0.5 0.5 0.5];
+eurosKm=[0.5 0.5 0.5];
+
+//Drivers
+maxD = [200 100 100];
