@@ -1,7 +1,7 @@
 
 from Solver import Solver
 from Solution import Solution
-from LocalSearch import LocalSearch
+#from LocalSearch import LocalSearch
 
 # Inherits from a parent abstract solver.
 class Solver_Greedy(Solver):
@@ -11,33 +11,25 @@ class Solver_Greedy(Solver):
         solution = Solution.createEmptySolution(config, problem)
         
         # get tasks and sort them by their total required resources in descending order
-        drivers = problem.getDrivers()
-        sortedDrivers = sorted(drivers, key=lambda driver: driver.getWorkedHours(), reverse=False)
+        services = problem.getServices()
+        sortedServices = sorted(services,
+                                key=lambda service: (service.getPassengers(), service.getNumOverlappingServices()),
+                                reverse=True)
         
         elapsedEvalTime = 0
         evaluatedCandidates = 0
         
         # for each task taken in sorted order
-        for task in sortedTasks:
-            taskId = task.getId()
-            feasibleAssignments, task_elapsedEvalTime, task_evaluatedCandidates = solution.findFeasibleAssignments(taskId)
-            elapsedEvalTime += task_elapsedEvalTime
-            evaluatedCandidates += task_evaluatedCandidates
+        for service in sortedServices:
+            serviceId = service.getId()
+            busesAssignments, driversAssignments = solution.findFeasibleAssignments(serviceId)
 
-            # choose assignment with minimum highest load
-            minHighestLoad = float('infinity')
-            choosenAssignment = None
-            for feasibleAssignment in feasibleAssignments:
-                if (feasibleAssignment.highestLoad < minHighestLoad):
-                    minHighestLoad = feasibleAssignment.highestLoad
-                    choosenAssignment = feasibleAssignment
+            sortedBusesAssignments = sorted(busesAssignments, key=lambda busAssi: busAssi.cost)
 
-            if(choosenAssignment is None):
-                solution.makeInfeasible()
-                break
-            
+            sortedDriversAssignments = sorted(driversAssignments, key=lambda driverAssi: driverAssi.cost)
+
             # assign the current task to the CPU that resulted in a minimum highest load
-            solution.assign(task.getId(), choosenAssignment.cpuId)
+            solution.assign(sortedDriversAssignments.driver, sortedBusesAssignments.bus, service.getId())
 
         return(solution, elapsedEvalTime, evaluatedCandidates)
 
@@ -57,11 +49,11 @@ class Solver_Greedy(Solver):
         if (evaluatedCandidates != 0):
             avg_evalTimePerCandidate = 1000.0 * elapsedEvalTime / float(evaluatedCandidates)
 
-        print ''
-        print 'Greedy Candidate Evaluation Performance:'
-        print '  Num. Candidates Eval.', evaluatedCandidates
-        print '  Total Eval. Time     ', elapsedEvalTime, 's'
-        print '  Avg. Time / Candidate', avg_evalTimePerCandidate, 'ms'
+        # print ''
+        # print 'Greedy Candidate Evaluation Performance:'
+        # print '  Num. Candidates Eval.', evaluatedCandidates
+        # print '  Total Eval. Time     ', elapsedEvalTime, 's'
+        # print '  Avg. Time / Candidate', avg_evalTimePerCandidate, 'ms'
         
         localSearch.printPerformance()
         
