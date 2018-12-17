@@ -23,7 +23,7 @@ class Solution(Problem):
     @staticmethod
     def createEmptySolution(config, problem):
         solution = Solution(problem.inputData)
-        solution.setVerbose(config.verbose)
+        # solution.setVerbose(config.verbose)
         return solution
 
     def __init__(self, inputData):
@@ -143,27 +143,25 @@ class Solution(Problem):
 
         return True
 
-    def findFeasibleAssignments(self):
+    def findFeasibleAssignments(self, serviceId):
         busesAssignments = []
         driversAssignments = []
         for i in range(0, self.inputData.nBuses):
-            for j in range(0, self.inputData.nServices):
-                if self.isFeasibleToAssignBusToService(i, j):
-                    cost = self.inputData.DM[j] * self.inputData.eurosMin[i] + self.inputData.DK[i] * self.inputData.eurosKm[j]
-                    busesAssignments.append(BusAssignment(i, j, cost))
+            if self.isFeasibleToAssignBusToService(i, serviceId):
+                cost = self.inputData.DM[serviceId] * self.inputData.eurosMin[i] + self.inputData.DK[i] * self.inputData.eurosKm[serviceId]
+                busesAssignments.append(BusAssignment(i, serviceId, cost))
         for i in range(0, self.inputData.nDrivers):
-            for j in range(0, self.inputData.nServices):
-                if self.isFeasibleToAssignDriverToService(i, j):
-                    cost = 0
-                    if self.inputData.BM - self.worked_minutes[i] > 0:
-                        if (self.inputData.BM - (self.worked_minutes[i] + self.inputData.DM[j])) >= 0:  # all cost is "normal"
-                            cost = self.inputData.DM[j] * self.inputData.CBM
-                        else:  # some cost is "normal" and some is extra
-                            cost = (self.inputData.BM - self.worked_minutes[i]) * self.inputData.CBM + \
-                                   (self.inputData.DM[j] - (self.inputData.BM - self.worked_minutes[i])) * self.inputData.CEM
-                    else:  # all cost is extra
-                        cost = self.inputData.DM[j] * self.inputData.CEM
-                    driversAssignments.append(DriverAssignment(i, j, cost))
+            if self.isFeasibleToAssignDriverToService(i, serviceId):
+                cost = 0
+                if self.inputData.BM - self.worked_minutes[i] > 0:
+                    if (self.inputData.BM - (self.worked_minutes[i] + self.inputData.DM[serviceId])) >= 0:  # all cost is "normal"
+                        cost = self.inputData.DM[serviceId] * self.inputData.CBM
+                    else:  # some cost is "normal" and some is extra
+                        cost = (self.inputData.BM - self.worked_minutes[i]) * self.inputData.CBM + \
+                               (self.inputData.DM[serviceId] - (self.inputData.BM - self.worked_minutes[i])) * self.inputData.CEM
+                else:  # all cost is extra
+                    cost = self.inputData.DM[serviceId] * self.inputData.CEM
+                driversAssignments.append(DriverAssignment(i, serviceId, cost))
 
         return busesAssignments, driversAssignments
 
