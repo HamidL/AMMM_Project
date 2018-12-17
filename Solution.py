@@ -175,10 +175,10 @@ class Solution(Problem):
             if self.worked_minutes[i] + self.DM[serviceId] < self.BM[i] and \
                     self.isFeasibleToAssignDriverToService(i, serviceId):
                 notExtratimeWorkers[i] = 1
-
+        driverAssignment = None
         if driverAssignment is None:  # all of them would enter extra hours period, select the minimum directly
             for i in range(0, self.nDrivers):
-
+                pass
         busAssignment = None
 
 
