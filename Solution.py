@@ -1,15 +1,19 @@
 import copy
 import time
+import numpy as np
 from Problem import Problem
 
 
 # Assignment class stores the assignment of a driver and a bus to a certain service
-class Assignment(object):
-    def __init__(self, driver, bus, service):
-        self.driver = driver
-        self.bus = bus
-        self.service = service
+class BusAssignment(object):
+    def __init__(self, busId, serviceId):
+        self.bus = busId
+        self.service = serviceId
 
+class DriverAssignment(object):
+    def __init__(self, driverId, serviceId):
+        self.driver = driverId
+        self.service = serviceId
 
 # Solution includes functions to manage the solution, to perform feasibility
 # checks and to dump the solution into a string or file.
@@ -94,13 +98,28 @@ class Solution(Problem):
 
         return True
 
+    def assignDriver(self, driverId, serviceId):
+        if not self.isFeasibleToAssignDriverToService(driverId, serviceId):
+            return False
+
+        self.worked_minutes[driverId] += self.DM[serviceId]  # add minutes worked to driver
+        self.driver_to_services[driverId].append(serviceId)  # add service to list of driver services
+        self.service_to_drivers[serviceId].append(driverId)  # add driver to list of service drivers
+        return True
+
+    def assignBus(self, busId, serviceId):
+        if not self.isFeasibleToAssignBusToService(busId, serviceId)
+            return False
+
+        self.bus_to_services[busId].append(serviceId)  # add service to list of bus services
+        self.service_to_buses[serviceId].append(busId)  # add bus to list of service buses
+        return True
+
     def unassign(self, driverId, busId, serviceId):
         # is it really necessary to check if is possible to unasign??
         self.worked_minutes[driverId] -= self.DM[serviceId]
         self.driver_to_services[driverId].remove(serviceId)
-
         self.service_to_drivers[serviceId].remove(driverId)
-
         self.bus_to_services[busId].remove(serviceId)
         if(len(self.bus_to_services[busId]) == 0):
             self.used_buses -= 1
@@ -109,44 +128,45 @@ class Solution(Problem):
 
         return True
 
-    def getHighestLoad(self):
-        return (self.highestLoad)
+    def unassignDriver(self, driverId, serviceId):
+        self.worked_minutes[driverId] -= self.DM[serviceId]
+        self.driver_to_services[driverId].remove(serviceId)
+        self.service_to_drivers[serviceId].remove(driverId)
 
-    def findFeasibleAssignments(self, taskId):
-        startEvalTime = time.time()
-        evaluatedCandidates = 0
+        return True
 
-        feasibleAssignments = []
-        for cpu in self.cpus:
-            cpuId = cpu.getId()
-            feasible = self.assign(taskId, cpuId)
+    def unassignBus(self, busId, serviceId):
+        self.bus_to_services[busId].remove(serviceId)
+        self.service_to_buses[serviceId].remove(busId)
 
-            evaluatedCandidates += 1
-            if (not feasible): continue
+        return True
 
-            assignment = Assignment(taskId, cpuId, self.getHighestLoad())
-            feasibleAssignments.append(assignment)
+    def findFeasibleAssignments(self):
+        busesAssignments = []
+        driversAssignments = []
+        for i in range(0, self.nBuses):
+            for j in range(0, self.nServices):
+                if self.isFeasibleToAssignBusToService(i, j):
+                    busesAssignments.append(BusAssignment(i, j))
+        for i in range(0, self.nDrivers):
+            for j in range(0, self.nServices):
+                if self.isFeasibleToAssignDriverToService(i, j):
+                    driversAssignments.append(DriverAssignment(i, j))
 
-            self.unassign(taskId, cpuId)
+        return busesAssignments, driversAssignments
 
-        elapsedEvalTime = time.time() - startEvalTime
-        return (feasibleAssignments, elapsedEvalTime, evaluatedCandidates)
+    def findBestFeasibleAssignment(self, serviceId):
+        # drivers: el que haya trabajado menos hasta llegar a BM, en el caso de que sea igual, el que tenga menos tiempo
+        # trabajado en general
+        notExtratimeWorkers = np.zeros((self.nDrivers), dtype=int)
+        for i in range(0, self.nDrivers):
+            if self.BM - self.worked_minutes[i] > 0 and self.isFeasibleToAssignDriverToService(i, serviceId):
+                driverAssignment = DriverAssignment(i, serviceId)
+        if driverAssignment is None:  # all of them would enter extra hours period, select the minimum directly
+            for i in range(0, self.nDrivers):
 
-    def findBestFeasibleAssignment(self, taskId):
-        bestAssignment = Assignment(taskId, None, float('infinity'))
-        for cpu in self.cpus:
-            cpuId = cpu.getId()
-            feasible = self.assign(taskId, cpuId)
-            if (not feasible): continue
+        busAssignment = None
 
-            curHighestLoad = self.getHighestLoad()
-            if (bestAssignment.highestLoad > curHighestLoad):
-                bestAssignment.cpuId = cpuId
-                bestAssignment.highestLoad = curHighestLoad
-
-            self.unassign(taskId, cpuId)
-
-        return (bestAssignment)
 
     def __str__(self):  # toString equivalent
         nTasks = self.inputData.nTasks
