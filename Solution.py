@@ -148,7 +148,7 @@ class Solution(Problem):
         driversAssignments = []
         for i in range(0, self.inputData.nBuses):
             if self.isFeasibleToAssignBusToService(i, serviceId):
-                cost = self.inputData.DM[serviceId] * self.inputData.eurosMin[i] + self.inputData.DK[i] * self.inputData.eurosKm[serviceId]
+                cost = self.inputData.DM[serviceId] * self.inputData.eurosMin[i] + self.inputData.DK[serviceId] * self.inputData.eurosKm[i]
                 busesAssignments.append(BusAssignment(i, serviceId, cost))
         for i in range(0, self.inputData.nDrivers):
             if self.isFeasibleToAssignDriverToService(i, serviceId):
