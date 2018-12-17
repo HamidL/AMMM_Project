@@ -47,6 +47,7 @@ class Solution(Problem):
 
         self.worked_minutes = [0] * self.inputData.nDrivers  # array of worked minutes for each driver
         self.used_buses = 0
+        self.cost = 0
 
         self.feasible = True
 
@@ -82,21 +83,22 @@ class Solution(Problem):
             return None
         return self.service_to_drivers[serviceId]
 
-    def assign(self, driverId, busId, serviceId):
-        if not self.isFeasibleToAssignDriverToService(driverId, serviceId):
+    def assign(self, driverAssignment, busAssignment, serviceId):
+        if not self.isFeasibleToAssignDriverToService(driverAssignment.driver, serviceId):
             return False
-        if not self.isFeasibleToAssignBusToService(busId, serviceId):
+        if not self.isFeasibleToAssignBusToService(busAssignment.bus, serviceId):
             return False
 
-        if len(self.bus_to_services[busId]) == 0:  # if it was not being used, add 1 to used_buses
+        if len(self.bus_to_services[busAssignment.bus]) == 0:  # if it was not being used, add 1 to used_buses
             self.used_buses += 1
 
-        self.bus_to_services[busId].append(serviceId)  # add service to list of bus services
-        self.service_to_buses[serviceId].append(busId)  # add bus to list of service buses
+        self.bus_to_services[busAssignment.bus].append(serviceId)  # add service to list of bus services
+        self.service_to_buses[serviceId].append(busAssignment.bus)  # add bus to list of service buses
+        self.cost += driverAssignment.cost + busAssignment.cost
 
-        self.worked_minutes[driverId] += self.inputData.DM[serviceId]  # add minutes worked to driver
-        self.driver_to_services[driverId].append(serviceId)  # add service to list of driver services
-        self.service_to_drivers[serviceId].append(driverId)  # add driver to list of service drivers
+        self.worked_minutes[driverAssignment.driver] += self.inputData.DM[serviceId]  # add minutes worked to driver
+        self.driver_to_services[driverAssignment.driver].append(serviceId)  # add service to list of driver services
+        self.service_to_drivers[serviceId].append(driverAssignment.driver)  # add driver to list of service drivers
 
         return True
 
