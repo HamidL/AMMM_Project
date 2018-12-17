@@ -1,3 +1,5 @@
+from Driver import Driver
+
 class Problem(object):
     def __init__(self, inputData):
         self.inputData = inputData
@@ -16,7 +18,7 @@ class Problem(object):
         eurosKm = self.inputData.eurosKm
         maxD = self.inputData.maxD
 
-        self.OV = [[0 for x in range(nServices)] for y in range(nServices)]
+        self.OV = [[0]*nServices]*nServices
 
         for s1 in range(0, nServices):
             for s2 in range(s1+1, nServices):
@@ -24,40 +26,9 @@ class Problem(object):
                     self.OV[s1][s2] = 1
                     self.OV[s2][s1] = 1
 
-    def getTasks(self):
-        return (self.tasks)
+        self.drivers = []
+        for d in range(0, nDrivers):
+            self.drivers.append(Driver(d, maxD[d]))
 
-    def getCPUs(self):
-        return (self.cpus)
-
-    def checkInstance(self):
-        totalCapacityCPUs = 0.0
-        maxCoreCapacity = 0.0
-        for cpu in self.cpus:
-            capacity = cpu.getTotalCapacity()
-            totalCapacityCPUs += capacity
-            for coreId in cpu.getCoreIds():
-                capacity = cpu.getTotalCapacityByCore(coreId)
-                maxCoreCapacity = max(maxCoreCapacity, capacity)
-
-        totalResourcesTasks = 0.0
-        for task in self.tasks:
-            resources = task.getTotalResources()
-            totalResourcesTasks += resources
-
-            threadIds = task.getThreadIds()
-            for threadId in threadIds:
-                threadRes = task.getResourcesByThread(threadId)
-                if (threadRes > maxCoreCapacity): return (False)
-
-            feasible = False
-            for cpu in self.cpus:
-                capacity = cpu.getTotalCapacity()
-                feasible = (resources < capacity)
-                if (feasible): break
-
-            if (not feasible): return (False)
-
-        if (totalCapacityCPUs < totalResourcesTasks): return (False)
-
-        return (True)
+    def getDrivers(self):
+        return self.drivers
