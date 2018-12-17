@@ -30,22 +30,22 @@ class Solution(Problem):
         super(Solution, self).__init__(inputData)
 
         self.driver_to_services = []  # array: driver => services
-        for i in range(0, self.nDrivers):
+        for i in range(0, self.inputData.nDrivers):
             self.driver_to_services.append([])
 
         self.service_to_drivers = []  # array: service => drivers
-        for i in range(0, self.nServices):
+        for i in range(0, self.inputData.nServices):
             self.service_to_drivers.append([])
 
         self.bus_to_services = []  # hash table: bus => services
-        for i in range(0, self.nBuses):
+        for i in range(0, self.inputData.nBuses):
             self.bus_to_services.append([])
 
         self.service_to_buses = []  # hash table: service => buses
-        for i in range(0, self.nServices):
+        for i in range(0, self.inputData.nServices):
             self.service_to_buses.append([])
 
-        self.worked_minutes = [0] * self.nDrivers  # array of worked minutes for each driver
+        self.worked_minutes = [0] * self.inputData.nDrivers  # array of worked minutes for each driver
         self.used_buses = 0
 
         self.feasible = True
@@ -57,7 +57,7 @@ class Solution(Problem):
         return (self.feasible)
 
     def isFeasibleToAssignDriverToService(self, driverId, serviceId):
-        if self.worked_minutes[driverId] + self.DM[serviceId] > self.maxD[driverId]:
+        if self.worked_minutes[driverId] + self.inputData.DM[serviceId] > self.inputData.maxD[driverId]:
             return False
         for service in self.driver_to_services[driverId]:
             if self.OV[service][serviceId]:
@@ -68,7 +68,7 @@ class Solution(Problem):
         for service in self.bus_to_services[busId]:
             if self.OV[service][serviceId]:
                 return False
-        if len(self.bus_to_services[busId]) == 0 and self.used_buses == self.maxBuses:
+        if len(self.bus_to_services[busId]) == 0 and self.used_buses == self.inputData.maxBuses:
             return False
         return True
 
@@ -94,7 +94,7 @@ class Solution(Problem):
         self.bus_to_services[busId].append(serviceId)  # add service to list of bus services
         self.service_to_buses[serviceId].append(busId)  # add bus to list of service buses
 
-        self.worked_minutes[driverId] += self.DM[serviceId]  # add minutes worked to driver
+        self.worked_minutes[driverId] += self.inputData.DM[serviceId]  # add minutes worked to driver
         self.driver_to_services[driverId].append(serviceId)  # add service to list of driver services
         self.service_to_drivers[serviceId].append(driverId)  # add driver to list of service drivers
 
@@ -104,7 +104,7 @@ class Solution(Problem):
         if not self.isFeasibleToAssignDriverToService(driverId, serviceId):
             return False
 
-        self.worked_minutes[driverId] += self.DM[serviceId]  # add minutes worked to driver
+        self.worked_minutes[driverId] += self.inputData.DM[serviceId]  # add minutes worked to driver
         self.driver_to_services[driverId].append(serviceId)  # add service to list of driver services
         self.service_to_drivers[serviceId].append(driverId)  # add driver to list of service drivers
         return True
@@ -119,7 +119,7 @@ class Solution(Problem):
 
     def unassign(self, driverId, busId, serviceId):
         # is it really necessary to check if is possible to unasign??
-        self.worked_minutes[driverId] -= self.DM[serviceId]
+        self.worked_minutes[driverId] -= self.inputData.DM[serviceId]
         self.driver_to_services[driverId].remove(serviceId)
         self.service_to_drivers[serviceId].remove(driverId)
         self.bus_to_services[busId].remove(serviceId)
@@ -131,7 +131,7 @@ class Solution(Problem):
         return True
 
     def unassignDriver(self, driverId, serviceId):
-        self.worked_minutes[driverId] -= self.DM[serviceId]
+        self.worked_minutes[driverId] -= self.inputData.DM[serviceId]
         self.driver_to_services[driverId].remove(serviceId)
         self.service_to_drivers[serviceId].remove(driverId)
 
@@ -146,23 +146,23 @@ class Solution(Problem):
     def findFeasibleAssignments(self):
         busesAssignments = []
         driversAssignments = []
-        for i in range(0, self.nBuses):
-            for j in range(0, self.nServices):
+        for i in range(0, self.inputData.nBuses):
+            for j in range(0, self.inputData.nServices):
                 if self.isFeasibleToAssignBusToService(i, j):
-                    cost = self.DM[j] * self.eurosMin[i] + self.DK[i] * self.eurosKm[j]
+                    cost = self.inputData.DM[j] * self.inputData.eurosMin[i] + self.inputData.DK[i] * self.inputData.eurosKm[j]
                     busesAssignments.append(BusAssignment(i, j, cost))
-        for i in range(0, self.nDrivers):
-            for j in range(0, self.nServices):
+        for i in range(0, self.inputData.nDrivers):
+            for j in range(0, self.inputData.nServices):
                 if self.isFeasibleToAssignDriverToService(i, j):
                     cost = 0
-                    if self.BM - self.worked_minutes[i] > 0:
-                        if (self.BM - (self.worked_minutes[i] + self.DM[j])) >= 0:  # all cost is "normal"
-                            cost = self.DM[j] * self.CBM
+                    if self.inputData.BM - self.worked_minutes[i] > 0:
+                        if (self.inputData.BM - (self.worked_minutes[i] + self.inputData.DM[j])) >= 0:  # all cost is "normal"
+                            cost = self.inputData.DM[j] * self.inputData.CBM
                         else:  # some cost is "normal" and some is extra
-                            cost = (self.BM - self.worked_minutes[i]) * self.CBM + \
-                                   (self.DM[j] - (self.BM - self.worked_minutes[i])) * self.CEM
+                            cost = (self.inputData.BM - self.worked_minutes[i]) * self.inputData.CBM + \
+                                   (self.inputData.DM[j] - (self.inputData.BM - self.worked_minutes[i])) * self.inputData.CEM
                     else:  # all cost is extra
-                        cost = self.DM[j] * self.CEM
+                        cost = self.inputData.DM[j] * self.inputData.CEM
                     driversAssignments.append(DriverAssignment(i, j, cost))
 
         return busesAssignments, driversAssignments
@@ -170,14 +170,14 @@ class Solution(Problem):
     def findBestFeasibleAssignment(self, serviceId):
         # drivers: el que haya trabajado menos hasta llegar a BM, en el caso de que sea igual, el que tenga menos tiempo
         # trabajado en general
-        notExtratimeWorkers = np.zeros((self.nDrivers), dtype=int)
-        for i in range(0, self.nDrivers):
-            if self.worked_minutes[i] + self.DM[serviceId] < self.BM[i] and \
+        notExtratimeWorkers = np.zeros((self.inputData.nDrivers), dtype=int)
+        for i in range(0, self.inputData.nDrivers):
+            if self.worked_minutes[i] + self.inputData.DM[serviceId] < self.inputData.BM[i] and \
                     self.isFeasibleToAssignDriverToService(i, serviceId):
                 notExtratimeWorkers[i] = 1
         driverAssignment = None
         if driverAssignment is None:  # all of them would enter extra hours period, select the minimum directly
-            for i in range(0, self.nDrivers):
+            for i in range(0, self.inputData.nDrivers):
                 pass
         busAssignment = None
 
