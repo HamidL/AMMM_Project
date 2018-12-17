@@ -6,14 +6,16 @@ from Problem import Problem
 
 # Assignment class stores the assignment of a driver and a bus to a certain service
 class BusAssignment(object):
-    def __init__(self, busId, serviceId):
+    def __init__(self, busId, serviceId, cost):
         self.bus = busId
         self.service = serviceId
+        self.cost = cost
 
 class DriverAssignment(object):
-    def __init__(self, driverId, serviceId):
+    def __init__(self, driverId, serviceId, cost):
         self.driver = driverId
         self.service = serviceId
+        self.cost = cost
 
 # Solution includes functions to manage the solution, to perform feasibility
 # checks and to dump the solution into a string or file.
@@ -108,7 +110,7 @@ class Solution(Problem):
         return True
 
     def assignBus(self, busId, serviceId):
-        if not self.isFeasibleToAssignBusToService(busId, serviceId)
+        if not self.isFeasibleToAssignBusToService(busId, serviceId):
             return False
 
         self.bus_to_services[busId].append(serviceId)  # add service to list of bus services
@@ -147,11 +149,21 @@ class Solution(Problem):
         for i in range(0, self.nBuses):
             for j in range(0, self.nServices):
                 if self.isFeasibleToAssignBusToService(i, j):
-                    busesAssignments.append(BusAssignment(i, j))
+                    cost = self.DM[j] * self.eurosMin[i] + self.DK[i] * self.eurosKm[j]
+                    busesAssignments.append(BusAssignment(i, j, cost))
         for i in range(0, self.nDrivers):
             for j in range(0, self.nServices):
                 if self.isFeasibleToAssignDriverToService(i, j):
-                    driversAssignments.append(DriverAssignment(i, j))
+                    cost = 0
+                    if self.BM - self.worked_minutes[i] > 0:
+                        if (self.BM - (self.worked_minutes[i] + self.DM[j])) >= 0:  # all cost is "normal"
+                            cost = self.DM[j] * self.CBM
+                        else:  # some cost is "normal" and some is extra
+                            cost = (self.BM - self.worked_minutes[i]) * self.CBM + \
+                                   (self.DM[j] - (self.BM - self.worked_minutes[i])) * self.CEM
+                    else:  # all cost is extra
+                        cost = self.DM[j] * self.CEM
+                    driversAssignments.append(DriverAssignment(i, j, cost))
 
         return busesAssignments, driversAssignments
 
@@ -160,8 +172,10 @@ class Solution(Problem):
         # trabajado en general
         notExtratimeWorkers = np.zeros((self.nDrivers), dtype=int)
         for i in range(0, self.nDrivers):
-            if self.BM - self.worked_minutes[i] > 0 and self.isFeasibleToAssignDriverToService(i, serviceId):
-                driverAssignment = DriverAssignment(i, serviceId)
+            if self.worked_minutes[i] + self.DM[serviceId] < self.BM[i] and \
+                    self.isFeasibleToAssignDriverToService(i, serviceId):
+                notExtratimeWorkers[i] = 1
+
         if driverAssignment is None:  # all of them would enter extra hours period, select the minimum directly
             for i in range(0, self.nDrivers):
 
