@@ -1,4 +1,6 @@
+import numpy as np
 from Driver import Driver
+from Service import Service
 
 class Problem(object):
     def __init__(self, inputData):
@@ -18,7 +20,7 @@ class Problem(object):
         eurosKm = self.inputData.eurosKm
         maxD = self.inputData.maxD
 
-        self.OV = [[0]*nServices]*nServices
+        self.OV = np.zeros((nServices, nServices), dtype=int)
 
         for s1 in range(0, nServices):
             for s2 in range(s1+1, nServices):
@@ -30,5 +32,12 @@ class Problem(object):
         for d in range(0, nDrivers):
             self.drivers.append(Driver(d, maxD[d]))
 
+        self.services = []
+        for s in range(0, nServices):
+            self.services.append(Service(s,NP[s],DK[s],ST[s],DM[s],self.OV[s]))
+
     def getDrivers(self):
         return self.drivers
+
+    def getServices(self):
+        return self.services

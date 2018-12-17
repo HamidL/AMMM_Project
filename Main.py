@@ -5,7 +5,7 @@ import sys
 from DATParser import DATParser
 from ValidateInputData import ValidateInputData
 from ValidateConfig import ValidateConfig
-#from Solver_Greedy import Solver_Greedy
+from Solver_Greedy import Solver_Greedy
 #from Solver_GRASP import Solver_GRASP
 from Problem import Problem
 from Solution import Solution
@@ -26,6 +26,8 @@ def run():
     print ('Creating Problem...')
     problem = Problem(inputData)
 
+    solver = Solver_Greedy()
+    solution = solver.solve(config, problem)
     # if(problem.checkInstance()):
     #     print 'Solving Problem...'
     #     solver = None
