@@ -87,28 +87,41 @@ class LocalSearch(object):
             
         return(highestLoad)
     
-    def getAssignmentsSortedByCPULoad(self, solution):
-        tasks = solution.getTasks()
-        cpus = solution.getCPUs()
+    def getAssignmentsSortedByCost(self, solution):
+        buses = solution.getBuses()
+        drivers = solution.getDrivers()
+        services = solution.getServices()
         
         # create vector of task assignments.
         # Each element is a tuple <task, cpu> 
-        assignments = []
-        for task in tasks:
-            taskId = task.getId()
-            cpuId = solution.getCPUIdAssignedToTaskId(taskId)
-            cpu = cpus[cpuId]
-            highestLoad = solution.loadPerCPUId[cpuId]
-            assignment = (task, cpu, highestLoad)
-            assignments.append(assignment)
+        busAssignments = []
+        busCosts = solution.getBusCosts()
+        for b in buses:
+            busId = b.getId()
+            serviceId = solution.getServiceIdAssignedToBusId(busId)
+            service = services[serviceId]
+            cost = solution.busCostPerServiceId(serviceId)
+            assignment = (b, service, cost)
+            busAssignments.append(assignment)
+
+        driverAssignments = []
+        driverCost = solution.getDriverCosts()
+        for d in drivers:
+            driverId = d.getId()
+            serviceId = solution.getServiceIdAssignedToBusId(busId)
+            service = services[serviceId]
+            cost = driverCost[d]
+            assignment = (d, service, cost)
+            driverAssignments.append(assignment)
 
         # For best improvement policy it does not make sense to sort the tasks since all of them must be explored.
         # However, for first improvement, we can start by the tasks assigned to the more loaded CPUs.
-        if(self.policy == 'BestImprovement'): return(assignments)
+        if(self.policy == 'BestImprovement'): return(busAssignments,driverAssignments)
         
-        # Sort task assignments by the load of the assigned CPU in descending order.
-        sorted_assignments = sorted(assignments, key=lambda assignment:assignment[2], reverse=True)
-        return(sorted_assignments)
+        # Sort task assignments by the cost of the assigned Service in descending order.
+        sortedBusAssignments = sorted(busAssignments, key=lambda busAssignment:busAssignment[2], reverse=True)
+        sortedDriverAssignments = sorted(driverAssignments, key=lambda driverAssignment:driverAssignment[2], reverse=True)
+        return(sortedBusAssignments,sortedDriverAssignments)
     
     def exploreNeighborhood(self, solution):
         services = solution.getServices()
@@ -117,7 +130,7 @@ class LocalSearch(object):
         bestNeighbor = solution
         
         if(self.nhStrategy == 'Reassignment'):
-            sortedAssignments = self.getAssignmentsSortedByCPULoad(solution)
+            sortedAssignments = self.getAssignmentsSortedByCost(solution)
                 
             for assignment in sortedAssignments:
                 task = assignment[0]
