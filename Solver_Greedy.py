@@ -31,10 +31,11 @@ class Solver_Greedy(Solver):
             bestBusAssignement = []
             for assi in sortedBusesAssignments:
                 totalCap += problem.getBuses()[assi.bus].getCapacity()
-                if(totalCap >= service.getPassengers()):
-                    break
                 numBuses += 1
                 bestBusAssignement.append(assi)
+                if(totalCap >= service.getPassengers()):
+                    break
+
             if (totalCap < service.getPassengers()):
                 solution.makeInfeasible()
                 break

@@ -32,6 +32,7 @@ def run():
     print(solution.driver_to_services)
     print(solution.bus_to_services)
     print(solution.worked_minutes)
+    print(solution.cost)
     # if(problem.checkInstance()):
     #     print 'Solving Problem...'
     #     solver = None

@@ -111,9 +111,9 @@ class LocalSearch(object):
         return(sorted_assignments)
     
     def exploreNeighborhood(self, solution):
-        cpus = solution.getCPUs()
+        services = solution.getServices()
         
-        curHighestLoad = solution.getHighestLoad()
+        curCost = solution.cost
         bestNeighbor = solution
         
         if(self.nhStrategy == 'Reassignment'):
