@@ -58,7 +58,7 @@ class Solution(Problem):
         return (self.feasible)
 
     def isFeasibleToAssignDriverToService(self, driverId, serviceId):
-        if self.worked_minutes[driverId] + self.inputData.DM[serviceId] > self.inputData.maxD[driverId]:
+        if self.worked_minutes[driverId] + self.getServices()[serviceId].getDM() > self.getDrivers()[driverId].getMaxD():
             return False
         for service in self.driver_to_services[driverId]:
             if self.OV[service][serviceId]:
@@ -83,6 +83,16 @@ class Solution(Problem):
             return None
         return self.service_to_drivers[serviceId]
 
+    def getServicesAssignedToBus(self, busId):
+        if len(self.bus_to_services[busId]) == 0:
+            return None
+        return self.bus_to_services[busId]
+
+    def getServicesAssignedToDriver(self, driverId):
+        if len(self.driver_to_services[driverId]) == 0:
+            return None
+        return self.driver_to_services[driverId]
+
     def assign(self, driverAssignment, busAssignment, serviceId):
         if not self.isFeasibleToAssignDriverToService(driverAssignment.driver, serviceId):
             return False
@@ -96,32 +106,15 @@ class Solution(Problem):
         self.service_to_buses[serviceId].append(busAssignment.bus)  # add bus to list of service buses
         self.cost += driverAssignment.cost + busAssignment.cost
 
-        self.worked_minutes[driverAssignment.driver] += self.inputData.DM[serviceId]  # add minutes worked to driver
+        self.worked_minutes[driverAssignment.driver] += self.getServices()[serviceId].getDM()  # add minutes worked to driver
         self.driver_to_services[driverAssignment.driver].append(serviceId)  # add service to list of driver services
         self.service_to_drivers[serviceId].append(driverAssignment.driver)  # add driver to list of service drivers
 
         return True
 
-    def assignDriver(self, driverId, serviceId):
-        if not self.isFeasibleToAssignDriverToService(driverId, serviceId):
-            return False
-
-        self.worked_minutes[driverId] += self.inputData.DM[serviceId]  # add minutes worked to driver
-        self.driver_to_services[driverId].append(serviceId)  # add service to list of driver services
-        self.service_to_drivers[serviceId].append(driverId)  # add driver to list of service drivers
-        return True
-
-    def assignBus(self, busId, serviceId):
-        if not self.isFeasibleToAssignBusToService(busId, serviceId):
-            return False
-
-        self.bus_to_services[busId].append(serviceId)  # add service to list of bus services
-        self.service_to_buses[serviceId].append(busId)  # add bus to list of service buses
-        return True
-
     def unassign(self, driverId, busId, serviceId):
         # is it really necessary to check if is possible to unasign??
-        self.worked_minutes[driverId] -= self.inputData.DM[serviceId]
+        self.worked_minutes[driverId] -= self.inputData.getServices()[serviceId].getDM()
         self.driver_to_services[driverId].remove(serviceId)
         self.service_to_drivers[serviceId].remove(driverId)
         self.bus_to_services[busId].remove(serviceId)
@@ -133,7 +126,7 @@ class Solution(Problem):
         return True
 
     def unassignDriver(self, driverId, serviceId):
-        self.worked_minutes[driverId] -= self.inputData.DM[serviceId]
+        self.worked_minutes[driverId] -= self.inputData.getServices()[serviceId].getDM()
         self.driver_to_services[driverId].remove(serviceId)
         self.service_to_drivers[serviceId].remove(driverId)
 
@@ -150,19 +143,19 @@ class Solution(Problem):
         driversAssignments = []
         for i in range(0, self.inputData.nBuses):
             if self.isFeasibleToAssignBusToService(i, serviceId):
-                cost = self.inputData.DM[serviceId] * self.inputData.eurosMin[i] + self.inputData.DK[serviceId] * self.inputData.eurosKm[i]
+                cost = self.getServices()[serviceId].getDM() * self.getBuses()[i].getEurosMin() + self..getServices()[serviceId].getDK() * self.getBuses()[i].getEurosKm()
                 busesAssignments.append(BusAssignment(i, serviceId, cost))
         for i in range(0, self.inputData.nDrivers):
             if self.isFeasibleToAssignDriverToService(i, serviceId):
                 cost = 0
                 if self.inputData.BM - self.worked_minutes[i] > 0:
-                    if (self.inputData.BM - (self.worked_minutes[i] + self.inputData.DM[serviceId])) >= 0:  # all cost is "normal"
-                        cost = self.inputData.DM[serviceId] * self.inputData.CBM
+                    if (self.inputData.BM - (self.worked_minutes[i] + self.inputData.getServices()[serviceId].getDM())) >= 0:  # all cost is "normal"
+                        cost = self.getServices()[serviceId].getDM() * self.inputData.CBM
                     else:  # some cost is "normal" and some is extra
                         cost = (self.inputData.BM - self.worked_minutes[i]) * self.inputData.CBM + \
-                               (self.inputData.DM[serviceId] - (self.inputData.BM - self.worked_minutes[i])) * self.inputData.CEM
+                               (self.getServices()[serviceId].getDM() - (self.inputData.BM - self.worked_minutes[i])) * self.inputData.CEM
                 else:  # all cost is extra
-                    cost = self.inputData.DM[serviceId] * self.inputData.CEM
+                    cost = self.getServices()[serviceId].getDM() * self.inputData.CEM
                 driversAssignments.append(DriverAssignment(i, serviceId, cost))
 
         return busesAssignments, driversAssignments
@@ -172,7 +165,7 @@ class Solution(Problem):
         # trabajado en general
         notExtratimeWorkers = np.zeros((self.inputData.nDrivers), dtype=int)
         for i in range(0, self.inputData.nDrivers):
-            if self.worked_minutes[i] + self.inputData.DM[serviceId] < self.inputData.BM[i] and \
+            if self.worked_minutes[i] + self.getServices()[serviceId].getDM() < self.inputData.BM[i] and \
                     self.isFeasibleToAssignDriverToService(i, serviceId):
                 notExtratimeWorkers[i] = 1
         driverAssignment = None
