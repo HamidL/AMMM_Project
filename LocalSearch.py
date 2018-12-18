@@ -197,7 +197,7 @@ class LocalSearch(object):
         if(not solution.isFeasible()): return(solution)
 
         bestSolution = solution
-        bestHighestLoad = bestSolution.getHighestLoad()
+        bestHighestLoad = bestSolution.cost
         
         startEvalTime = time.time()
         iterations = 0

@@ -1,6 +1,7 @@
 import numpy as np
 from Driver import Driver
 from Service import Service
+from Bus import Bus
 
 class Problem(object):
     def __init__(self, inputData):
@@ -36,8 +37,15 @@ class Problem(object):
         for s in range(0, nServices):
             self.services.append(Service(s,NP[s],DK[s],ST[s],DM[s],self.OV[s]))
 
+        self.buses = []
+        for b in range(0, nBuses):
+            self.buses.append(Bus(b, cap[b], eurosMin[b], eurosKm[b]))
+
     def getDrivers(self):
         return self.drivers
 
     def getServices(self):
         return self.services
+
+    def getBuses(self):
+        return self.buses

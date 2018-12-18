@@ -28,6 +28,10 @@ def run():
 
     solver = Solver_Greedy()
     solution = solver.solve(config, problem)
+    print(problem.OV)
+    print(solution.driver_to_services)
+    print(solution.bus_to_services)
+    print(solution.worked_minutes)
     # if(problem.checkInstance()):
     #     print 'Solving Problem...'
     #     solver = None

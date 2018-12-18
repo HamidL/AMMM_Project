@@ -1,7 +1,7 @@
 
 from Solver import Solver
 from Solution import Solution
-#from LocalSearch import LocalSearch
+from LocalSearch import LocalSearch
 
 # Inherits from a parent abstract solver.
 class Solver_Greedy(Solver):
@@ -24,12 +24,31 @@ class Solver_Greedy(Solver):
             serviceId = service.getId()
             busesAssignments, driversAssignments = solution.findFeasibleAssignments(serviceId)
 
+
             sortedBusesAssignments = sorted(busesAssignments, key=lambda busAssi: busAssi.cost)
+            totalCap = 0
+            numBuses = 0
+            bestBusAssignement = []
+            for assi in sortedBusesAssignments:
+                totalCap += problem.getBuses()[assi.bus].getCapacity()
+                if(totalCap >= service.getPassengers()):
+                    break
+                numBuses += 1
+                bestBusAssignement.append(assi)
+            if (totalCap < service.getPassengers()):
+                solution.makeInfeasible()
+                break
 
             sortedDriversAssignments = sorted(driversAssignments, key=lambda driverAssi: driverAssi.cost)
+            bestDriverAssignement = []
+            for d in range(0,numBuses):
+                bestDriverAssignement.append(sortedDriversAssignments[d])
 
-            # assign the current task to the CPU that resulted in a minimum highest load
-            solution.assign(sortedDriversAssignments.driver, sortedBusesAssignments.bus, service.getId())
+            if (len(bestDriverAssignement) < numBuses):
+                solution.makeInfeasible()
+                break
+            for i in range(0,numBuses):
+                solution.assign(sortedDriversAssignments[i], sortedBusesAssignments[i], service.getId())
 
         return(solution, elapsedEvalTime, evaluatedCandidates)
 
@@ -38,12 +57,12 @@ class Solver_Greedy(Solver):
         self.writeLogLine(float('infinity'), 0)
         
         solution, elapsedEvalTime, evaluatedCandidates = self.greedyConstruction(config, problem)
-        self.writeLogLine(solution.getHighestLoad(), 1)
+        self.writeLogLine((solution.cost), 1)
 
         localSearch = LocalSearch(config)
         solution = localSearch.run(solution)
 
-        self.writeLogLine(solution.getHighestLoad(), 1)
+        self.writeLogLine(solution.cost, 1)
         
         avg_evalTimePerCandidate = 0.0
         if (evaluatedCandidates != 0):
