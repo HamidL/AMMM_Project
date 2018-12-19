@@ -6,7 +6,7 @@ from DATParser import DATParser
 from ValidateInputData import ValidateInputData
 from ValidateConfig import ValidateConfig
 from Solver_Greedy import Solver_Greedy
-#from Solver_GRASP import Solver_GRASP
+from Solver_GRASP import Solver_GRASP
 from Problem import Problem
 from Solution import Solution
 
@@ -26,8 +26,12 @@ def run():
     print ('Creating Problem...')
     problem = Problem(inputData)
 
-    solver = Solver_Greedy()
-    solution = solver.solve(config, problem)
+    if (config.solver == 'Greedy'):
+        solver = Solver_Greedy()
+        solution = solver.solve(config, problem)
+    elif (config.solver == 'GRASP'):
+        solver = Solver_GRASP()
+        solution = solver.solve(config, problem)
     print(problem.OV)
     print(solution.driver_to_services)
     print(solution.bus_to_services)

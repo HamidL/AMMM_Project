@@ -5,10 +5,10 @@ import copy, time
 # A new solution can be created based on an existing solution and a list of
 # changes can be created using the createNeighborSolution(solution, changes) function.
 class Change(object):
-    def __init__(self, taskId, curCPUId, newCPUId):
-        self.taskId = taskId
-        self.curCPUId = curCPUId
-        self.newCPUId = newCPUId
+    def __init__(self, driverId, curServicesIds, newServiceId):
+        self.driverId = driverId
+        self.curServicesIds = curServicesIds
+        self.newServiceId = newServiceId
 
 # Implementation of a local search using two neighborhoods and two different policies.
 class LocalSearch(object):
@@ -37,20 +37,16 @@ class LocalSearch(object):
     
     
     def evaluateNeighbor(self, solution, changes):
-        newAvailCapPerCPUId = copy.deepcopy(solution.availCapacityPerCPUId)
-        newAvailCapPerCoreId = copy.deepcopy(solution.availCapacityPerCoreId)
+        newWorkedMinutes = copy.deepcopy(solution.worked_minutes)
 
         for change in changes:
-            taskId = change.taskId
-            task = solution.tasks[taskId]
-            taskThreadIds = task.getThreadIds()
+            driverId = change.driverId
+            driver = solution.getDrivers()[driverId]
+            newService = change.newServiceId
+            curServicesIds = change.curServicesIds
             
-            curCPUId = change.curCPUId
-            
-            for threadId in taskThreadIds:
-                resources = task.getResourcesByThread(threadId)
-                coreId = solution.getCoreIdAssignedToThreadId(threadId)
-                newAvailCapPerCoreId[coreId] += resources
+            for serviceId in curServicesIds:
+                newWorkedMinutes[coreId] += resources
                 newAvailCapPerCPUId[curCPUId] += resources
 
         for change in changes:
@@ -98,30 +94,34 @@ class LocalSearch(object):
         busCosts = solution.getBusCosts()
         for b in buses:
             busId = b.getId()
-            serviceId = solution.getServiceIdAssignedToBusId(busId)
-            service = services[serviceId]
-            cost = solution.busCostPerServiceId(serviceId)
-            assignment = (b, service, cost)
+            servicesId = solution.getServicesAssignedToBus(busId)
+            assiServices = []
+            for s in servicesId:
+                assiServices = services[s]
+            cost = busCosts[busId]
+            assignment = (b, assiServices, cost)
             busAssignments.append(assignment)
 
         driverAssignments = []
         driverCost = solution.getDriverCosts()
         for d in drivers:
             driverId = d.getId()
-            serviceId = solution.getServiceIdAssignedToBusId(busId)
-            service = services[serviceId]
-            cost = driverCost[d]
-            assignment = (d, service, cost)
+            serviceId = solution.getServicesAssignedToDriver(driverId)
+            assiServices = []
+            for s in servicesId:
+                assiServices = services[s]
+            cost = driverCost[driverId]
+            assignment = (d, assiServices, cost)
             driverAssignments.append(assignment)
 
         # For best improvement policy it does not make sense to sort the tasks since all of them must be explored.
         # However, for first improvement, we can start by the tasks assigned to the more loaded CPUs.
-        if(self.policy == 'BestImprovement'): return(busAssignments,driverAssignments)
+        if(self.policy == 'BestImprovement'): return busAssignments,driverAssignments
         
         # Sort task assignments by the cost of the assigned Service in descending order.
         sortedBusAssignments = sorted(busAssignments, key=lambda busAssignment:busAssignment[2], reverse=True)
         sortedDriverAssignments = sorted(driverAssignments, key=lambda driverAssignment:driverAssignment[2], reverse=True)
-        return(sortedBusAssignments,sortedDriverAssignments)
+        return sortedBusAssignments,sortedDriverAssignments
     
     def exploreNeighborhood(self, solution):
         services = solution.getServices()
@@ -130,22 +130,24 @@ class LocalSearch(object):
         bestNeighbor = solution
         
         if(self.nhStrategy == 'Reassignment'):
-            sortedAssignments = self.getAssignmentsSortedByCost(solution)
+            sortedBusAssignments, sortedDriverAssignments = self.getAssignmentsSortedByCost(solution)
                 
-            for assignment in sortedAssignments:
-                task = assignment[0]
-                taskId = task.getId()
+            for assignment in sortedBusAssignments:
+                print(assignment)
+                bus = assignment[0]
+                busId = bus.getId()
                 
-                curCPU = assignment[1]
-                curCPUId = curCPU.getId()
-                
-                for cpu in cpus:
-                    newCPUId = cpu.getId()
-                    if(newCPUId == curCPUId): continue
+                curServices = assignment[1]
+                curServicesId = []
+                for curS in curServices:
+                    curServicesId.append(curS.getId())
+                for s in services:
+                    newServiceId = s.getId()
+                    if(newServiceId in curServicesId): continue
                     
                     changes = []
-                    changes.append(Change(taskId, curCPUId, newCPUId))
-                    neighborHighestLoad = self.evaluateNeighbor(solution, changes)
+                    changes.append(Change(bus, curServicesId, newServiceId))
+                    neighboCost = self.evaluateNeighbor(solution, changes)
                     if(curHighestLoad > neighborHighestLoad):
                         neighbor = self.createNeighborSolution(solution, changes)
                         if(neighbor is None): continue
