@@ -83,7 +83,7 @@ class LocalSearch(object):
             
         return(highestLoad)
     
-    def getAssignmentsSortedByCost(self, solution):
+    def getDriversAndBusesAssignements(self, solution):
         buses = solution.getBuses()
         drivers = solution.getDrivers()
         services = solution.getServices()
@@ -91,27 +91,25 @@ class LocalSearch(object):
         # create vector of task assignments.
         # Each element is a tuple <task, cpu> 
         busAssignments = []
-        busCosts = solution.getBusCosts()
         for b in buses:
             busId = b.getId()
             servicesId = solution.getServicesAssignedToBus(busId)
             assiServices = []
             for s in servicesId:
                 assiServices = services[s]
-            cost = busCosts[busId]
-            assignment = (b, assiServices, cost)
+            assignment = (b, assiServices, b.getEurosMin * b.getEurosKm)
             busAssignments.append(assignment)
 
         driverAssignments = []
         driverCost = solution.getDriverCosts()
         for d in drivers:
             driverId = d.getId()
-            serviceId = solution.getServicesAssignedToDriver(driverId)
+            servicesId = solution.getServicesAssignedToDriver(driverId)
             assiServices = []
             for s in servicesId:
                 assiServices = services[s]
-            cost = driverCost[driverId]
-            assignment = (d, assiServices, cost)
+            workedTime = solution.worked_minutes[driverId]
+            assignment = (d, assiServices, workedTime)
             driverAssignments.append(assignment)
 
         # For best improvement policy it does not make sense to sort the tasks since all of them must be explored.
@@ -130,7 +128,7 @@ class LocalSearch(object):
         bestNeighbor = solution
         
         if(self.nhStrategy == 'Reassignment'):
-            sortedBusAssignments, sortedDriverAssignments = self.getAssignmentsSortedByCost(solution)
+            sortedBusAssignments, sortedDriverAssignments = self.getDriversAndBusesAssignements(solution)
                 
             for assignment in sortedBusAssignments:
                 print(assignment)
