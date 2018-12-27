@@ -59,7 +59,6 @@ class LocalSearch(object):
 
         busAssignments = solution.busAssignments
         driverAssignments = solution.driverAssignments
-
         if(self.policy == 'BestImprovement'): return busAssignments,driverAssignments
 
         sortedBusAssignments = sorted(busAssignments, key=lambda busAssignment:buses[busAssignment.bus].getEurosMin * buses[busAssignment.bus].getEurosKm, reverse=True)
@@ -69,10 +68,11 @@ class LocalSearch(object):
     
     def exploreNeighborhoodBus(self, solution, sortedBusAssignments):
         curHighestCost = solution.cost
+        bestNeighbor = solution
         for assignment in sortedBusAssignments:
             curServices, posBuses = solution.findBusesInOtherServices(assignment.bus)
-            for posBus in posBuses[assignment.service]:
-                newAssignment, neighborHighestCost = solution.evaluateChangeBus(assignment, posBus)
+            for posBus in posBuses[curServices.index(assignment.service)]:
+                newAssignment, neighborHighestCost = solution.evaluateChange(assignment, posBus)
                 if (curHighestCost > neighborHighestCost):
                     neighbor = self.createNeighborSolutionBus(solution, assignment, newAssignment)
                     if (neighbor is None): continue
@@ -85,10 +85,11 @@ class LocalSearch(object):
 
     def exploreNeighborhoodDriver(self, solution, sortedDriverAssignments):
         curHighestCost = solution.cost
+        bestNeighbor = solution
         for assignment in sortedDriverAssignments:
             curServices, posDrivers = solution.findDriversInOtherServices(assignment.driver)
-            for posDriver in posDrivers[assignment.service]:
-                newAssignment, neighborHighestCost = solution.evaluateChangeDriver(assignment, posDriver)
+            for posDriver in posDrivers[curServices.index(assignment.service)]:
+                newAssignment, neighborHighestCost = solution.evaluateChange(assignment, posDriver)
                 if (curHighestCost > neighborHighestCost):
                     neighbor = self.createNeighborSolution(solution, assignment, posDriver)
                     if (neighbor is None): continue
@@ -104,7 +105,6 @@ class LocalSearch(object):
         
         if(self.nhStrategy == 'Reassignment'):
             sortedBusAssignments, sortedDriverAssignments = self.getDriversAndBusesAssignements(solution)
-
             neighborBus = self.exploreNeighborhoodBus(solution, sortedBusAssignments)
             neighbor = self.exploreNeighborhoodDriver(neighborBus, sortedDriverAssignments)
 
@@ -165,7 +165,7 @@ class LocalSearch(object):
         if(not solution.isFeasible()): return(solution)
 
         bestSolution = solution
-        bestHighestLoad = bestSolution.cost
+        bestHighestCost = bestSolution.cost
         
         startEvalTime = time.time()
         iterations = 0
@@ -177,10 +177,10 @@ class LocalSearch(object):
             iterations += 1
             
             neighbor = self.exploreNeighborhood(bestSolution)
-            curHighestLoad = neighbor.getHighestLoad()
-            if(bestHighestLoad > curHighestLoad):
+            curHighestCost = neighbor.cost
+            if(bestHighestCost > curHighestCost):
                 bestSolution = neighbor
-                bestHighestLoad = curHighestLoad
+                bestHighestCost = curHighestCost
                 keepIterating = True
         
         self.iterations += iterations

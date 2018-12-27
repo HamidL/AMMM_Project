@@ -59,12 +59,8 @@ class Solution(Problem):
             self.service_to_buses.append([])
 
         self.busAssignments = []
-        for i in range(0, self.inputData.nServices):
-            self.busAssignments.append([])
 
         self.driverAssignments = []
-        for i in range(0, self.inputData.nServices):
-            self.driverAssignments.append([])
 
         self.worked_minutes = [0] * self.inputData.nDrivers  # array of worked minutes for each driver
         self.used_buses = 0
@@ -282,7 +278,7 @@ class Solution(Problem):
     def findBusesInOtherServices(self, busId):
         buses = []
         services = deepcopy(self.bus_to_services[busId])
-        total_buses = [x for x in range(0, len(self.inputData.nBuses))]
+        total_buses = [x for x in range(0, self.inputData.nBuses)]
         index = 0
         for service in services:
             buses.append([])
@@ -296,7 +292,7 @@ class Solution(Problem):
     def findDriversInOtherServices(self, driverId):
         drivers = []
         services = deepcopy(self.driver_to_services[driverId])
-        total_drivers = [x for x in range(0, len(self.inputData.nDrivers))]
+        total_drivers = [x for x in range(0, self.inputData.nDrivers)]
         index = 0
         for service in services:
             drivers.append([])
@@ -333,7 +329,7 @@ class Solution(Problem):
                         newcost = (self.inputData.BM - self.worked_minutes[id]) * self.inputData.CBM + \
                                (self.getServices()[assignment.service].getMinutes() - (self.inputData.BM - self.worked_minutes[id])) * self.inputData.CEM
                 else:  # all cost is extra
-                    newcost = self.getServices()[assignment].getMinutes() * self.inputData.CEM
+                    newcost = self.getServices()[assignment.service].getMinutes() * self.inputData.CEM
                     cost += newcost
                 driverAssignment = DriverAssignment(id, assignment.service, cost)
             else:

@@ -32,11 +32,11 @@ def run():
     elif (config.solver == 'GRASP'):
         solver = Solver_GRASP()
         solution = solver.solve(config, problem)
-    print(problem.OV)
-    print(solution.driver_to_services)
-    print(solution.bus_to_services)
-    print(solution.worked_minutes)
-    print(solution.cost)
+    # print(problem.OV)
+    # print(solution.driver_to_services)
+    # print(solution.bus_to_services)
+    # print(solution.worked_minutes)
+    # print(solution.cost)
     # if(problem.checkInstance()):
     #     print 'Solving Problem...'
     #     solver = None

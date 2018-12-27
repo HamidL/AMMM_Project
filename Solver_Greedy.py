@@ -49,7 +49,7 @@ class Solver_Greedy(Solver):
                 solution.makeInfeasible()
                 break
             for i in range(0,numBuses):
-                solution.assign(sortedDriversAssignments[i], sortedBusesAssignments[i], service.getId())
+                solution.assign(sortedDriversAssignments[i], sortedBusesAssignments[i])
 
         return(solution, elapsedEvalTime, evaluatedCandidates)
 

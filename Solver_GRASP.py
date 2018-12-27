@@ -74,7 +74,7 @@ class Solver_GRASP(Solver):
                 break
 
             for i in range(0, len(selDrivers)):
-                solution.assign(selDrivers[i], selBuses[i], serviceId)
+                solution.assign(selDrivers[i], selBuses[i])
 
         return (solution, iteration_elapsedEvalTime, iteration_evaluatedCandidates)
 
