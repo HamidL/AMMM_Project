@@ -5,10 +5,10 @@ import copy, time
 # A new solution can be created based on an existing solution and a list of
 # changes can be created using the createNeighborSolution(solution, changes) function.
 class Change(object):
-    def __init__(self, driverId, curServicesIds, newServiceId):
-        self.driverId = driverId
-        self.curServicesIds = curServicesIds
-        self.newServiceId = newServiceId
+    def __init__(self, fromId, toId, service):
+        self.fromId = fromId
+        self.toId = toId
+        self.service = service
 
 # Implementation of a local search using two neighborhoods and two different policies.
 class LocalSearch(object):
@@ -115,45 +115,34 @@ class LocalSearch(object):
         # For best improvement policy it does not make sense to sort the tasks since all of them must be explored.
         # However, for first improvement, we can start by the tasks assigned to the more loaded CPUs.
         if(self.policy == 'BestImprovement'): return busAssignments,driverAssignments
-        
-        # Sort task assignments by the cost of the assigned Service in descending order.
+
         sortedBusAssignments = sorted(busAssignments, key=lambda busAssignment:busAssignment[2], reverse=True)
         sortedDriverAssignments = sorted(driverAssignments, key=lambda driverAssignment:driverAssignment[2], reverse=True)
         return sortedBusAssignments,sortedDriverAssignments
     
     def exploreNeighborhood(self, solution):
-        services = solution.getServices()
-        
-        curCost = solution.cost
+        curHighestCost = solution.cost
         bestNeighbor = solution
         
         if(self.nhStrategy == 'Reassignment'):
             sortedBusAssignments, sortedDriverAssignments = self.getDriversAndBusesAssignements(solution)
                 
             for assignment in sortedBusAssignments:
-                print(assignment)
                 bus = assignment[0]
-                busId = bus.getId()
-                
-                curServices = assignment[1]
-                curServicesId = []
-                for curS in curServices:
-                    curServicesId.append(curS.getId())
-                for s in services:
-                    newServiceId = s.getId()
-                    if(newServiceId in curServicesId): continue
-                    
-                    changes = []
-                    changes.append(Change(bus, curServicesId, newServiceId))
-                    neighboCost = self.evaluateNeighbor(solution, changes)
-                    if(curHighestLoad > neighborHighestLoad):
-                        neighbor = self.createNeighborSolution(solution, changes)
-                        if(neighbor is None): continue
-                        if(self.policy == 'FirstImprovement'):
-                            return(neighbor)
-                        else:
-                            bestNeighbor = neighbor
-                            curHighestLoad = neighborHighestLoad
+                curServices, posBuses = solution.findBusesInOtherServices(bus.getId())
+                changes = []
+                for i in range(len(curServices)):
+                    for posBus in posBuses[i]:
+                        changes.append(Change(curServices[i].getId(), bus.getId(), posBus.getId()))
+                        neighboCost = self.evaluateNeighbor(solution, changes)
+                        if(curHighestCost > neighboCost):
+                            neighbor = self.createNeighborSolution(solution, changes)
+                            if(neighbor is None): continue
+                            if(self.policy == 'FirstImprovement'):
+                                return(neighbor)
+                            else:
+                                bestNeighbor = neighbor
+                                curHighestLoad = neighborHighestLoad
                             
         elif(self.nhStrategy == 'Exchange'):
             # For the Exchange neighborhood and first improvement policy, try exchanging
