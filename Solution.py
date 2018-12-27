@@ -2,6 +2,7 @@ import copy
 import time
 import numpy as np
 from Problem import Problem
+from copy import deepcopy
 
 
 # Assignment class stores the assignment of a driver and a bus to a certain service
@@ -236,6 +237,40 @@ class Solution(Problem):
                 pass
         busAssignment = None
 
+    def _overlapping(self, servicesA, servicesB):
+        for service in servicesA:
+            for nested_service in servicesB:
+                if self.OV[service][nested_service]:
+                    return True
+        return False
+
+    def findBusesInOtherServices(self, busId):
+        buses = []
+        services = deepcopy(self.bus_to_services[busId])
+        total_buses = [x for x in range(0, len(self.inputData.nBuses))]
+        index = 0
+        for service in services:
+            buses.append([])
+            diff_buses = [x for x in total_buses if x not in self.service_to_buses[service]]
+            for bus in diff_buses:
+                if not self._overlapping(services, self.bus_to_services[bus]):
+                    buses[index].append(bus)
+            index += 1
+        return services, buses
+
+    def findDriversInOtherServices(self, driverId):
+        drivers = []
+        services = deepcopy(self.driver_to_services[driverId])
+        total_drivers = [x for x in range(0, len(self.inputData.nDrivers))]
+        index = 0
+        for service in services:
+            drivers.append([])
+            diff_drivers = [x for x in total_drivers if x not in self.service_to_drivers[service]]
+            for driver in diff_drivers:
+                if not self._overlapping(services, self.driver_to_services[driver]):
+                    drivers[index].append(driver)
+            index += 1
+        return services, drivers
 
     def __str__(self):  # toString equivalent
         nTasks = self.inputData.nTasks
