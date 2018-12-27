@@ -3,6 +3,7 @@ import time
 import numpy as np
 from Problem import Problem
 from copy import deepcopy
+from LocalSearch import Change
 
 
 # Assignment class stores the assignment of a driver and a bus to a certain service
@@ -146,23 +147,47 @@ class Solution(Problem):
                    (workedMinutes - self.inputData.BM) * self.inputData.CEM
         return cost
 
-    def assign(self, driverAssignment, busAssignment, serviceId):
-        if not self.isFeasibleToAssignDriverToService(driverAssignment.driver, serviceId):
+    def assign(self, driverAssignment, busAssignment):
+        if not self.isFeasibleToAssignDriverToService(driverAssignment.driver, driverAssignment.service):
             return False
-        if not self.isFeasibleToAssignBusToService(busAssignment.bus, serviceId):
+        if not self.isFeasibleToAssignBusToService(busAssignment.bus, busAssignment.service):
             return False
 
         if len(self.bus_to_services[busAssignment.bus]) == 0:  # if it was not being used, add 1 to used_buses
             self.used_buses += 1
 
-        self.bus_to_services[busAssignment.bus].append(serviceId)  # add service to list of bus services
-        self.service_to_buses[serviceId].append(busAssignment.bus)  # add bus to list of service buses
+        self.bus_to_services[busAssignment.bus].append(busAssignment.service)  # add service to list of bus services
+        self.service_to_buses[busAssignment.service].append(busAssignment.bus)  # add bus to list of service buses
         self.cost += driverAssignment.cost + busAssignment.cost
         self.busAssignments.append(busAssignment)
 
-        self.worked_minutes[driverAssignment.driver] += self.getServices()[serviceId].getMinutes()  # add minutes worked to driver
-        self.driver_to_services[driverAssignment.driver].append(serviceId)  # add service to list of driver services
-        self.service_to_drivers[serviceId].append(driverAssignment.driver)  # add driver to list of service drivers
+        self.worked_minutes[driverAssignment.driver] += self.getServices()[driverAssignment.service].getMinutes()  # add minutes worked to driver
+        self.driver_to_services[driverAssignment.driver].append(driverAssignment.service)  # add service to list of driver services
+        self.service_to_drivers[driverAssignment.service].append(driverAssignment.driver)  # add driver to list of service drivers
+        self.driverAssignments.append(driverAssignment)
+
+        return True
+
+    def assignBus(self, busAssignment):
+        if not self.isFeasibleToAssignBusToService(busAssignment.bus, busAssignment.service):
+            return False
+
+        if len(self.bus_to_services[busAssignment.bus]) == 0:
+            self.used_buses += 1
+        self.bus_to_services[busAssignment.bus].append(busAssignment.service)
+        self.service_to_buses[busAssignment.service].append(busAssignment.bus)  # add bus to list of service buses
+        self.cost += busAssignment.cost
+        self.busAssignments.append(busAssignment)
+
+        return True
+
+    def assignDriver(self, driverAssignment):
+        if not self.isFeasibleToAssignDriverToService(driverAssignment.driver, driverAssignment.service):
+            return False
+
+        self.worked_minutes[driverAssignment.driver] += self.getServices()[driverAssignment.service].getMinutes()  # add minutes worked to driver
+        self.driver_to_services[driverAssignment.driver].append(driverAssignment.service)  # add service to list of driver services
+        self.service_to_drivers[driverAssignment.service].append(driverAssignment.driver)  # add driver to list of service drivers
         self.driverAssignments.append(driverAssignment)
 
         return True
@@ -177,7 +202,7 @@ class Solution(Problem):
                 self.driverAssignments.remove(ass)
                 break
 
-        if(len(self.bus_to_services[busAssignment.bus]) == 0):
+        if len(self.bus_to_services[busAssignment.bus]) == 1:
             self.used_buses -= 1
         self.bus_to_services[busAssignment.bus].remove(busAssignment.service)
         self.service_to_buses[busAssignment.service].remove(busAssignment.bus)
@@ -188,16 +213,26 @@ class Solution(Problem):
 
         return True
 
-    def unassignDriver(self, driverId, serviceId):
-        self.worked_minutes[driverId] -= self.getServices()[serviceId].getMinutes()
-        self.driver_to_services[driverId].remove(serviceId)
-        self.service_to_drivers[serviceId].remove(driverId)
+    def unassignDriver(self, driverAssignment):
+        self.worked_minutes[driverAssignment.driver] -= self.inputData.getServices()[driverAssignment.service].getMinutes()
+        self.driver_to_services[driverAssignment.driver].remove(driverAssignment.service)
+        self.service_to_drivers[driverAssignment.service].remove(driverAssignment.driver)
+        for ass in self.driverAssignments:
+            if ass.equal(driverAssignment):
+                self.driverAssignments.remove(ass)
+                break
 
         return True
 
-    def unassignBus(self, busId, serviceId):
-        self.bus_to_services[busId].remove(serviceId)
-        self.service_to_buses[serviceId].remove(busId)
+    def unassignBus(self, busAssignment):
+        if len(self.bus_to_services[busAssignment.bus]) == 1:
+            self.used_buses -= 1
+        self.bus_to_services[busAssignment.bus].remove(busAssignment.service)
+        self.service_to_buses[busAssignment.service].remove(busAssignment.bus)
+        for ass in self.busAssignments:
+            if ass.equal(busAssignment):
+                self.busAssignments.remove(ass)
+                break
 
         return True
 
@@ -271,6 +306,41 @@ class Solution(Problem):
                     drivers[index].append(driver)
             index += 1
         return services, drivers
+
+    def evaluateChange(self, assignment, id):
+        if type(assignment) == BusAssignment:
+            cost = self.cost
+            cost -= assignment.cost
+            busAssignment = None
+            if self.isFeasibleToAssignBusToService(id, assignment.service):
+                newcost = self.getServices()[assignment.service].getMinutes() * self.getBuses()[id].getEurosMin() +\
+                        self.getServices()[assignment.service].getKm() * self.getBuses()[id].getEurosKm()
+                busAssignment = BusAssignment(assignment.bus, assignment.service, newcost)
+                cost += newcost
+            else:
+                return False
+            return busAssignment, cost
+        elif type(assignment) == DriverAssignment:
+            cost = self.cost
+            cost -= assignment.cost
+            driverAssignment = None
+            if self.isFeasibleToAssignDriverToService(id, assignment.service):
+                newcost = 0
+                if self.inputData.BM - self.worked_minutes[id] > 0:
+                    if (self.inputData.BM - (self.worked_minutes[id] + self.getServices()[assignment.service].getMinutes())) >= 0:  # all cost is "normal"
+                        newcost = self.getServices()[assignment.service].getMinutes() * self.inputData.CBM
+                    else:  # some cost is "normal" and some is extra
+                        newcost = (self.inputData.BM - self.worked_minutes[id]) * self.inputData.CBM + \
+                               (self.getServices()[assignment.service].getMinutes() - (self.inputData.BM - self.worked_minutes[id])) * self.inputData.CEM
+                else:  # all cost is extra
+                    newcost = self.getServices()[assignment].getMinutes() * self.inputData.CEM
+                    cost += newcost
+                driverAssignment = DriverAssignment(id, assignment.service, cost)
+            else:
+                return False
+            return driverAssignment, cost
+        else:
+            return False
 
     def __str__(self):  # toString equivalent
         nTasks = self.inputData.nTasks
