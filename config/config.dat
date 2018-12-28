@@ -14,5 +14,5 @@ alpha                = 0.4;                   # Alpha parameter for the GRASP so
 # --- Local Search specific parameters ------------------------------------------------------------------------
 # Ignored if solver is not Greedy or GRASP.
 localSearch          = True;                  # Enable local search?
-neighborhoodStrategy = Exchange;          # Supported Neighborhoods: Reassignment / Exchange
+neighborhoodStrategy = Reassignment;          # Supported Neighborhoods: Reassignment / Exchange
 policy               = BestImprovement;       # Supported Policies: BestImprovement / FirstImprovement

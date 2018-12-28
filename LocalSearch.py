@@ -124,7 +124,7 @@ class LocalSearch(object):
             for posDriver in posDrivers[curServices.index(assignment.service)]:
                 newAssignment, neighborHighestCost = solution.evaluateReassignment(assignment, posDriver)
                 if (curHighestCost > neighborHighestCost):
-                    neighbor = self.createNeighborSolutionDriverR(solution, assignment, posDriver)
+                    neighbor = self.createNeighborSolutionDriverR(solution, assignment, newAssignment)
                     if (neighbor is None): continue
                     if (self.policy == 'FirstImprovement'):
                         return (neighbor)
