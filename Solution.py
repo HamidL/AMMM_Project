@@ -114,20 +114,22 @@ class Solution(Problem):
     def getBusAssignments(self):
         return self.busAssignments
 
-    def getBusAssignment(self, busId, serviceId):
+    def getBusAssignments(self, busId):
+        busAssignments = []
         for ass in self.busAssignments:
-            if ass.bus == busId and ass.service == serviceId:
-                return ass
-        return None
-
-    def getDriverAssignment(self, driverId, serviceId):
-        for ass in self.driverAssignments:
-            if ass.driver == driverId and ass.service == serviceId:
-                return ass
-        return None
+            if ass.bus == busId:
+                busAssignments.append(ass)
+        return busAssignments
 
     def getDriverAssignments(self):
         return self.driverAssignments
+
+    def getDriverAssignments(self, driverId):
+        driverAssignments = []
+        for ass in self.driverAssignments:
+            if ass.driver == driverId:
+                driverAssignments.append(ass)
+        return driverAssignments
 
     def getDriverCosts(self):
         costs = [0] * self.inputData.nDrivers
