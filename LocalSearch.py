@@ -103,17 +103,17 @@ class LocalSearch(object):
             curServices, posBuses = solution.findBusesInOtherServices(assignment.bus)
 
             for posBus in posBuses[curServices.index(assignment.service)]:
-                toAssi = solution.getBusAssignment(posBus, assignment.service)
-                newAssignements, neighborHighestCost = solution.evaluateExchange(assignment, toAssi)
-                if (curHighestCost > neighborHighestCost):
-                    oldAssignements = [assignment, toAssi]
-                    neighbor = self.createNeighborSolutionBusE(solution,oldAssignements, newAssignements)
-                    if (neighbor is None): continue
-                    if (self.policy == 'FirstImprovement'):
-                        return (neighbor)
-                    else:
-                        bestNeighbor = neighbor
-                        curHighestCost = neighborHighestCost
+                for posBusAssi in solution.getBusAssignments(posBus):
+                    newAssignements, neighborHighestCost = solution.evaluateExchange(assignment, posBusAssi)
+                    if (curHighestCost > neighborHighestCost):
+                        oldAssignements = [assignment, posBusAssi]
+                        neighbor = self.createNeighborSolutionBusE(solution,oldAssignements, newAssignements)
+                        if (neighbor is None): continue
+                        if (self.policy == 'FirstImprovement'):
+                            return (neighbor)
+                        else:
+                            bestNeighbor = neighbor
+                            curHighestCost = neighborHighestCost
         return bestNeighbor
 
     def exploreNeighborhoodDriverR(self, solution, sortedDriverAssignments):
@@ -140,17 +140,17 @@ class LocalSearch(object):
             curServices, posDrivers = solution.findDriversInOtherServices(assignment.driver)
 
             for posDriver in posDrivers[curServices.index(assignment.service)]:
-                toAssi = solution.getDriverAssignment(posDriver, assignment.service)
-                newAssignements, neighborHighestCost = solution.evaluateExchange(assignment, toAssi)
-                if (curHighestCost > neighborHighestCost):
-                    oldAssignements = [assignment, toAssi]
-                    neighbor = self.createNeighborSolutionDriverE(solution,oldAssignements, newAssignements)
-                    if (neighbor is None): continue
-                    if (self.policy == 'FirstImprovement'):
-                        return (neighbor)
-                    else:
-                        bestNeighbor = neighbor
-                        curHighestCost = neighborHighestCost
+                for posBusAssi in solution.getDriverAssignments(posDriver):
+                    newAssignements, neighborHighestCost = solution.evaluateExchange(assignment, posBusAssi)
+                    if (curHighestCost > neighborHighestCost):
+                        oldAssignements = [assignment, posBusAssi]
+                        neighbor = self.createNeighborSolutionDriverE(solution,oldAssignements, newAssignements)
+                        if (neighbor is None): continue
+                        if (self.policy == 'FirstImprovement'):
+                            return (neighbor)
+                        else:
+                            bestNeighbor = neighbor
+                            curHighestCost = neighborHighestCost
         return bestNeighbor
 
     def exploreNeighborhood(self, solution):
