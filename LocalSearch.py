@@ -46,7 +46,7 @@ class LocalSearch(object):
 
         newSolution = copy.deepcopy(solution)
 
-        newSolution.unassignDriver(assignment, newDriver)
+        newSolution.unassignDriver(assignment)
 
         assignment.bus = newDriver
         feasible = newSolution.assignDriver(assignment)
@@ -91,7 +91,7 @@ class LocalSearch(object):
             for posDriver in posDrivers[curServices.index(assignment.service)]:
                 newAssignment, neighborHighestCost = solution.evaluateChange(assignment, posDriver)
                 if (curHighestCost > neighborHighestCost):
-                    neighbor = self.createNeighborSolution(solution, assignment, posDriver)
+                    neighbor = self.createNeighborSolutionDriver(solution, assignment, posDriver)
                     if (neighbor is None): continue
                     if (self.policy == 'FirstImprovement'):
                         return (neighbor)

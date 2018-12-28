@@ -210,7 +210,7 @@ class Solution(Problem):
         return True
 
     def unassignDriver(self, driverAssignment):
-        self.worked_minutes[driverAssignment.driver] -= self.inputData.getServices()[driverAssignment.service].getMinutes()
+        self.worked_minutes[driverAssignment.driver] -= self.getServices()[driverAssignment.service].getMinutes()
         self.driver_to_services[driverAssignment.driver].remove(driverAssignment.service)
         self.service_to_drivers[driverAssignment.service].remove(driverAssignment.driver)
         for ass in self.driverAssignments:
@@ -314,7 +314,7 @@ class Solution(Problem):
                 busAssignment = BusAssignment(assignment.bus, assignment.service, newcost)
                 cost += newcost
             else:
-                return False
+                return None, float('infinity')
             return busAssignment, cost
         elif type(assignment) == DriverAssignment:
             cost = self.cost
@@ -333,10 +333,10 @@ class Solution(Problem):
                     cost += newcost
                 driverAssignment = DriverAssignment(id, assignment.service, cost)
             else:
-                return False
+                return None, float('infinity')
             return driverAssignment, cost
         else:
-            return False
+            return None, float('infinity')
 
     def __str__(self):  # toString equivalent
         nTasks = self.inputData.nTasks

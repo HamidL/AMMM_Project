@@ -41,13 +41,10 @@ class Solver_Greedy(Solver):
                 break
 
             sortedDriversAssignments = sorted(driversAssignments, key=lambda driverAssi: driverAssi.cost)
-            bestDriverAssignement = []
-            for d in range(0,numBuses):
-                bestDriverAssignement.append(sortedDriversAssignments[d])
-
-            if (len(bestDriverAssignement) < numBuses):
+            if (len(sortedDriversAssignments) < numBuses):
                 solution.makeInfeasible()
                 break
+
             for i in range(0,numBuses):
                 solution.assign(sortedDriversAssignments[i], sortedBusesAssignments[i])
 
