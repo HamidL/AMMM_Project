@@ -114,6 +114,18 @@ class Solution(Problem):
     def getBusAssignments(self):
         return self.busAssignments
 
+    def getBusAssignment(self, busId, serviceId):
+        for ass in self.busAssignments:
+            if ass.bus == busId and ass.service == serviceId:
+                return ass
+        return None
+
+    def getDriverAssignment(self, driverId, serviceId):
+        for ass in self.driverAssignments:
+            if ass.driver == driverId and ass.service == serviceId:
+                return ass
+        return None
+
     def getDriverAssignments(self):
         return self.driverAssignments
 
@@ -303,7 +315,7 @@ class Solution(Problem):
             index += 1
         return services, drivers
 
-    def evaluateChange(self, assignment, id):
+    def evaluateReassignment(self, assignment, id):
         if type(assignment) == BusAssignment:
             cost = self.cost
             cost -= assignment.cost
@@ -330,8 +342,62 @@ class Solution(Problem):
                                (self.getServices()[assignment.service].getMinutes() - (self.inputData.BM - self.worked_minutes[id])) * self.inputData.CEM
                 else:  # all cost is extra
                     newcost = self.getServices()[assignment.service].getMinutes() * self.inputData.CEM
-                    cost += newcost
-                driverAssignment = DriverAssignment(id, assignment.service, cost)
+                cost += newcost
+                driverAssignment = DriverAssignment(id, assignment.service, newcost)
+            else:
+                return None, float('infinity')
+            return driverAssignment, cost
+        else:
+            return None, float('infinity')
+
+    def evaluateExchange(self, assignment1, assignment2):
+        if type(assignment1) == BusAssignment:
+            cost = self.cost
+            cost -= assignment1.cost
+            cost -= assignment2.cost
+            busAssignment = []
+            if self.isFeasibleToAssignBusToService(assignment1.bus, assignment2.service) and \
+                    self.isFeasibleToAssignBusToService(assignment2.bus, assignment1.service):
+                newcost = self.getServices()[assignment2.service].getMinutes() * self.getBuses()[assignment1.bus].getEurosMin() + \
+                          self.getServices()[assignment2.service].getKm() * self.getBuses()[assignment1.bus].getEurosKm()
+                busAssignment.append(BusAssignment(assignment1.bus, assignment2.service, newcost))
+                cost += newcost
+                newcost = self.getServices()[assignment1.service].getMinutes() * self.getBuses()[assignment2.bus].getEurosMin() + \
+                          self.getServices()[assignment1.service].getKm() * self.getBuses()[assignment2.bus].getEurosKm()
+                busAssignment.append(BusAssignment(assignment2.bus, assignment1.service, newcost))
+                cost += newcost
+            else:
+                return None, float('infinity')
+            return busAssignment, cost
+        elif type(assignment1) == DriverAssignment:
+            cost = self.cost
+            cost -= assignment1.cost
+            cost -= assignment2.cost
+            driverAssignment = []
+            if self.isFeasibleToAssignDriverToService(assignment1.driver, assignment2.service) and \
+                    self.isFeasibleToAssignDriverToService(assignment2.driver, assignment1.service):
+                newcost = 0
+                if self.inputData.BM - self.worked_minutes[assignment1.driver] > 0:
+                    if (self.inputData.BM - (self.worked_minutes[assignment1.driver] + self.getServices()[assignment2.service].getMinutes())) >= 0:  # all cost is "normal"
+                        newcost = self.getServices()[assignment2.service].getMinutes() * self.inputData.CBM
+                    else:  # some cost is "normal" and some is extra
+                        newcost = (self.inputData.BM - self.worked_minutes[assignment1.driver]) * self.inputData.CBM + \
+                               (self.getServices()[assignment2.service].getMinutes() - (self.inputData.BM - self.worked_minutes[assignment1.driver])) * self.inputData.CEM
+                else:  # all cost is extra
+                    newcost = self.getServices()[assignment2.service].getMinutes() * self.inputData.CEM
+                cost += newcost
+                driverAssignment.append(DriverAssignment(assignment1.driver, assignment2.service, newcost))
+                newcost = 0
+                if self.inputData.BM - self.worked_minutes[assignment2.driver] > 0:
+                    if (self.inputData.BM - (self.worked_minutes[assignment2.driver] + self.getServices()[assignment1.service].getMinutes())) >= 0:  # all cost is "normal"
+                        newcost = self.getServices()[assignment1.service].getMinutes() * self.inputData.CBM
+                    else:  # some cost is "normal" and some is extra
+                        newcost = (self.inputData.BM - self.worked_minutes[assignment2.driver]) * self.inputData.CBM + \
+                               (self.getServices()[assignment1.service].getMinutes() - (self.inputData.BM - self.worked_minutes[assignment2.driver])) * self.inputData.CEM
+                else:  # all cost is extra
+                    newcost = self.getServices()[assignment1.service].getMinutes() * self.inputData.CEM
+                cost += newcost
+                driverAssignment.append(DriverAssignment(assignment2.driver, assignment1.service, newcost))
             else:
                 return None, float('infinity')
             return driverAssignment, cost
