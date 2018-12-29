@@ -66,11 +66,11 @@ class Solver_Greedy(Solver):
         if (evaluatedCandidates != 0):
             avg_evalTimePerCandidate = 1000.0 * elapsedEvalTime / float(evaluatedCandidates)
 
-        # print ''
-        # print 'Greedy Candidate Evaluation Performance:'
-        # print '  Num. Candidates Eval.', evaluatedCandidates
-        # print '  Total Eval. Time     ', elapsedEvalTime, 's'
-        # print '  Avg. Time / Candidate', avg_evalTimePerCandidate, 'ms'
+        print ('')
+        print ('Greedy Candidate Evaluation Performance:')
+        print ('  Num. Candidates Eval.', evaluatedCandidates)
+        print ('  Total Eval. Time     ', elapsedEvalTime, 's')
+        print ('  Avg. Time / Candidate', avg_evalTimePerCandidate, 'ms')
         
         localSearch.printPerformance()
         

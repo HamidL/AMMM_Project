@@ -85,6 +85,7 @@ class LocalSearch(object):
         for assignment in sortedBusAssignments:
             curServices, posBuses = solution.findBusesInOtherServices(assignment.bus)
             for posBus in posBuses[curServices.index(assignment.service)]:
+
                 newAssignment, neighborHighestCost = solution.evaluateReassignment(assignment, posBus)
                 if (curHighestCost > neighborHighestCost):
                     neighbor = self.createNeighborSolutionBusR(solution, assignment, newAssignment)
@@ -155,7 +156,6 @@ class LocalSearch(object):
 
     def exploreNeighborhood(self, solution):
         sortedBusAssignments, sortedDriverAssignments = self.getDriversAndBusesAssignements(solution)
-        
         if(self.nhStrategy == 'Reassignment'):
             neighborBus = self.exploreNeighborhoodBusR(solution, sortedBusAssignments)
             neighbor = self.exploreNeighborhoodDriverR(neighborBus, sortedDriverAssignments)
@@ -190,7 +190,7 @@ class LocalSearch(object):
             
             neighbor = self.exploreNeighborhood(bestSolution)
             curHighestCost = neighbor.cost
-            if(bestHighestCost > curHighestCost):
+            if (bestHighestCost > curHighestCost):
                 bestSolution = neighbor
                 bestHighestCost = curHighestCost
                 keepIterating = True
@@ -206,9 +206,9 @@ class LocalSearch(object):
         avg_evalTimePerIteration = 0.0
         if(self.iterations != 0):
             avg_evalTimePerIteration = 1000.0 * self.elapsedTime / float(self.iterations)
-        #
-        # print ''
-        # print 'Local Search Performance:'
-        # print '  Num. Iterations Eval.', self.iterations
-        # print '  Total Eval. Time     ', self.elapsedTime, 's'
-        # print '  Avg. Time / Iteration', avg_evalTimePerIteration, 'ms'
+
+        print ('')
+        print ('Local Search Performance:')
+        print ('  Num. Iterations Eval.', self.iterations)
+        print ('  Total Eval. Time     ', self.elapsedTime, 's')
+        print ('  Avg. Time / Iteration', avg_evalTimePerIteration, 'ms')
