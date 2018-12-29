@@ -74,7 +74,7 @@ class LocalSearch(object):
         driverAssignments = solution.driverAssignments
         if(self.policy == 'BestImprovement'): return busAssignments,driverAssignments
 
-        sortedBusAssignments = sorted(busAssignments, key=lambda busAssignment:buses[busAssignment.bus].getEurosMin * buses[busAssignment.bus].getEurosKm, reverse=True)
+        sortedBusAssignments = sorted(busAssignments, key=lambda busAssignment:buses[busAssignment.bus].getEurosMin() * buses[busAssignment.bus].getEurosKm(), reverse=True)
         sortedDriverAssignments = sorted(driverAssignments, key=lambda driverAssignment:solution.worked_minutes[driverAssignment.driver], reverse=True)
 
         return sortedBusAssignments,sortedDriverAssignments

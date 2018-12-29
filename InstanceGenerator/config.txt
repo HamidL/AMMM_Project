@@ -1,7 +1,7 @@
-nServices = 300
-nDrivers = 75
-nBuses = 75
-maxBuses = 70
+nServices = 100
+nDrivers = 65
+nBuses = 65
+maxBuses = 60
 MaxMinService = 100
 BM = 50
 CBM = 0.5
