@@ -25,7 +25,10 @@ def run():
 
     print ('Creating Problem...')
     problem = Problem(inputData)
-
+    print('Problem settings:')
+    print("Services: " + str(problem.inputData.nServices) + " Drivers: " + str(problem.inputData.nDrivers) + " Buses: " + str(problem.inputData.nBuses))
+    if(config.localSearch):
+        print("Solver: " + config.solver + " Neighborhood Strategy: " + config.neighborhoodStrategy + " Policy: " + config.policy)
     if (config.solver == 'Greedy'):
         solver = Solver_Greedy()
         solution = solver.solve(config, problem)
