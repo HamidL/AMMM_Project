@@ -12,6 +12,15 @@ class BusAssignment(object):
         self.bus = busId
         self.service = serviceId
         self.cost = cost
+        self._greedyCost = 0
+
+    @property
+    def greedyCost(self):
+        return self._greedyCost
+
+    @greedyCost.setter
+    def greedyCost(self, cost):
+        self._greedyCost = cost
 
     def equal(self, busAssignment):
         if busAssignment.bus == self.bus and busAssignment.service == self.service:
