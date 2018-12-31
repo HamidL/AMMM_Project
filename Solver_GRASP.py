@@ -28,6 +28,17 @@ class Solver_GRASP(Solver):
         if (len(rcl) == 0): return (None)
         return (random.choice(rcl))  # pick an element from rcl at random
 
+    def greedyFunctionCost(self, solution, remainCap, busesAssignments):
+        for busAssi in busesAssignments:
+            bus = solution.getBuses()[busAssi.bus]
+            service = solution.getServices()[busAssi.service]
+            if (remainCap <= bus.getCapacity()):
+                cost = busAssi.cost + busAssi.cost*(bus.getCapacity()-remainCap)/bus.getCapacity()
+            else:
+                cost = busAssi.cost + (busAssi.cost + service.getMinutes()*solution.inputData.CBM) * remainCap / bus.getCapacity()
+            busAssi.greedyCost = cost
+        return busesAssignments
+
     def greedyRandomizedConstruction(self, config, problem):
         solution = Solution.createEmptySolution(config, problem)
 
@@ -45,17 +56,24 @@ class Solver_GRASP(Solver):
             serviceId = service.getId()
             busesAssignments, driversAssignments = solution.findFeasibleAssignments(serviceId)
 
-            sortedBusesAssignments = sorted(busesAssignments, key=lambda busAssi: busAssi.cost)
-            totalCap = 0
+
+            remainCap = service.getPassengers()
             selBuses = []
-            while (totalCap < service.getPassengers()):
-                candidate = self.selectCandidate(config,sortedBusesAssignments)
+            while (remainCap > 0 and len(busesAssignments) > 0):
+                busesAssignments = self.greedyFunctionCost(solution, remainCap, busesAssignments)
+                busesAssignments = sorted(busesAssignments, key=lambda busAssi: busAssi.greedyCost)
+                candidate = self.selectCandidate(config,busesAssignments)
                 if(candidate is None):
                     solution.makeInfeasible()
                     break
                 selBuses.append(candidate)
-                sortedBusesAssignments.remove(candidate)
-                totalCap += problem.getBuses()[candidate.bus].getCapacity()
+                busesAssignments.remove(candidate)
+                remainCap -= problem.getBuses()[candidate.bus].getCapacity()
+
+            if (remainCap > 0):
+                solution.makeInfeasible()
+                break
+
             if(not solution.isFeasible()):
                 break
 

@@ -5,7 +5,18 @@ from LocalSearch import LocalSearch
 
 # Inherits from a parent abstract solver.
 class Solver_Greedy(Solver):
-    
+
+    def greedyFunctionCost(self, solution, remainCap, busesAssignments):
+        for busAssi in busesAssignments:
+            bus = solution.getBuses()[busAssi.bus]
+            service = solution.getServices()[busAssi.service]
+            if (remainCap <= bus.getCapacity()):
+                cost = busAssi.cost + busAssi.cost*(bus.getCapacity()-remainCap)/bus.getCapacity()
+            else:
+                cost = busAssi.cost + (busAssi.cost + service.getMinutes()*solution.inputData.CBM) * remainCap / bus.getCapacity()
+            busAssi.greedyCost = cost
+        return busesAssignments
+
     def greedyConstruction(self, config, problem):
         # get an empty solution for the problem
         solution = Solution.createEmptySolution(config, problem)
@@ -24,29 +35,30 @@ class Solver_Greedy(Solver):
             serviceId = service.getId()
             busesAssignments, driversAssignments = solution.findFeasibleAssignments(serviceId)
 
-
-            sortedBusesAssignments = sorted(busesAssignments, key=lambda busAssi: busAssi.cost)
-            totalCap = 0
-            numBuses = 0
-            bestBusAssignement = []
-            for assi in sortedBusesAssignments:
-                totalCap += problem.getBuses()[assi.bus].getCapacity()
-                numBuses += 1
-                bestBusAssignement.append(assi)
-                if(totalCap >= service.getPassengers()):
+            remainCap = service.getPassengers()
+            selBuses = []
+            while (remainCap > 0 and len(busesAssignments) > 0):
+                busesAssignments = self.greedyFunctionCost(solution, remainCap, busesAssignments)
+                busesAssignments = sorted(busesAssignments, key=lambda busAssi: busAssi.greedyCost)
+                candidate = busesAssignments[0]
+                if (candidate is None):
+                    solution.makeInfeasible()
                     break
+                selBuses.append(candidate)
+                busesAssignments.remove(candidate)
+                remainCap -= problem.getBuses()[candidate.bus].getCapacity()
 
-            if (totalCap < service.getPassengers()):
+            if (remainCap > 0):
                 solution.makeInfeasible()
                 break
 
             sortedDriversAssignments = sorted(driversAssignments, key=lambda driverAssi: driverAssi.cost)
-            if (len(sortedDriversAssignments) < numBuses):
+            if (len(sortedDriversAssignments) < len(selBuses)):
                 solution.makeInfeasible()
                 break
 
-            for i in range(0,numBuses):
-                solution.assign(sortedDriversAssignments[i], sortedBusesAssignments[i])
+            for i in range(0,len(selBuses)):
+                solution.assign(sortedDriversAssignments[i], selBuses[i])
 
         return(solution, elapsedEvalTime, evaluatedCandidates)
 
