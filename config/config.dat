@@ -1,5 +1,5 @@
 # --- Common specific parameters ------------------------------------------------------------------------------
-inputDataFile        = data/150S_65D_65B.dat;         # Input DAT file
+inputDataFile        = data/100S_65D_65B.dat;         # Input DAT file
 solutionFile         = solutions/example.sol; # Output DAT file (solution)
 solver               = GRASP;                 # Supported solvers: Greedy / GRASP
 maxExecTime          = 300;                    # Maximum execution time in seconds
@@ -9,10 +9,10 @@ maxExecTime          = 300;                    # Maximum execution time in secon
 
 # --- GRASP specific parameters -------------------------------------------------------------------------------
 # Ignored if solver is not GRASP.
-alpha                = 0;                   # Alpha parameter for the GRASP solver.
+alpha                = 0.1;                   # Alpha parameter for the GRASP solver.
 
 # --- Local Search specific parameters ------------------------------------------------------------------------
 # Ignored if solver is not Greedy or GRASP.
 localSearch          = True;                  # Enable local search?
-neighborhoodStrategy = Exchange;          # Supported Neighborhoods: Reassignment / Exchange
-policy               = BestImprovement;       # Supported Policies: BestImprovement / FirstImprovement
+neighborhoodStrategy = Reassignment;          # Supported Neighborhoods: Reassignment / Exchange
+policy               = FirstImprovement;       # Supported Policies: BestImprovement / FirstImprovement

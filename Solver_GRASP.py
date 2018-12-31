@@ -1,12 +1,35 @@
 import random, time
 from Solver import Solver
 from Solution import Solution
+from copy import deepcopy
 from LocalSearch import LocalSearch
 
 
 # Inherits from a parent abstract solver.
 class Solver_GRASP(Solver):
-    def selectCandidate(self, config, sortedCL):
+    def selectCandidateB(self, config, sortedCL):
+        if (len(sortedCL) == 0): return (None)
+
+        # sort candidate assignments by highestLoad in ascending order
+
+        # compute boundary highest load as a function of the minimum and maximum highest loads and the alpha parameter
+        alpha = config.alpha
+        minCost = sortedCL[0].greedyCost
+        maxCost = sortedCL[-1].greedyCost
+        boundaryCost = minCost + (maxCost - minCost) * alpha
+
+        # find elements that fall into the RCL (those fulfilling: highestLoad < boundaryHighestLoad)
+        maxIndex = 0
+        for x in sortedCL:
+            if (x.greedyCost > boundaryCost): break
+            maxIndex += 1
+
+        # create RCL and pick an element randomly
+        rcl = sortedCL[0:maxIndex]  # pick first maxIndex elements starting from element 0
+        if (len(rcl) == 0): return (None)
+        return rcl  # pick an element from rcl at random
+
+    def selectCandidateD(self, config, sortedCL):
         if (len(sortedCL) == 0): return (None)
 
         # sort candidate assignments by highestLoad in ascending order
@@ -22,13 +45,13 @@ class Solver_GRASP(Solver):
         for x in sortedCL:
             if (x.cost > boundaryCost): break
             maxIndex += 1
-
         # create RCL and pick an element randomly
         rcl = sortedCL[0:maxIndex]  # pick first maxIndex elements starting from element 0
         if (len(rcl) == 0): return (None)
-        return (random.choice(rcl))  # pick an element from rcl at random
+        return rcl  # pick an element from rcl at random
 
     def greedyFunctionCost(self, solution, remainCap, busesAssignments):
+        costs = []
         for busAssi in busesAssignments:
             bus = solution.getBuses()[busAssi.bus]
             service = solution.getServices()[busAssi.service]
@@ -37,6 +60,8 @@ class Solver_GRASP(Solver):
             else:
                 cost = busAssi.cost + (busAssi.cost + service.getMinutes()*solution.inputData.CBM) * remainCap / bus.getCapacity()
             busAssi.greedyCost = cost
+            costs.append(cost)
+        #print(sorted(costs,reverse=False))
         return busesAssignments
 
     def greedyRandomizedConstruction(self, config, problem):
@@ -48,28 +73,34 @@ class Solver_GRASP(Solver):
                                 key=lambda service: (service.getPassengers(), service.getNumOverlappingServices()),
                                 reverse=True)
 
+
         iteration_elapsedEvalTime = 0
         iteration_evaluatedCandidates = 0
 
         # for each task taken in sorted order
+        lenB = []
+        lenD = []
+        servicesIds = []
         for service in sortedServices:
             serviceId = service.getId()
+            servicesIds.append(serviceId)
             busesAssignments, driversAssignments = solution.findFeasibleAssignments(serviceId)
-
-
+            lenB.append(len(busesAssignments))
+            lenD.append(len(driversAssignments))
             remainCap = service.getPassengers()
             selBuses = []
             while (remainCap > 0 and len(busesAssignments) > 0):
                 busesAssignments = self.greedyFunctionCost(solution, remainCap, busesAssignments)
                 busesAssignments = sorted(busesAssignments, key=lambda busAssi: busAssi.greedyCost)
-                candidate = self.selectCandidate(config,busesAssignments)
-                if(candidate is None):
+                rcl = self.selectCandidateB(config, busesAssignments)
+                if(rcl is None):
                     solution.makeInfeasible()
                     break
+
+                candidate = random.choice(rcl)
                 selBuses.append(candidate)
                 busesAssignments.remove(candidate)
                 remainCap -= problem.getBuses()[candidate.bus].getCapacity()
-
             if (remainCap > 0):
                 solution.makeInfeasible()
                 break
@@ -79,12 +110,15 @@ class Solver_GRASP(Solver):
 
             sortedDriversAssignments = sorted(driversAssignments, key=lambda driverAssi: driverAssi.cost)
             selDrivers = []
+            if(len(sortedDriversAssignments) < len(selBuses)):
+                    solution.makeInfeasible()
+
             while (len(selDrivers) < len(selBuses)):
-                candidate = self.selectCandidate(config,sortedDriversAssignments)
-                if(candidate is None):
+                rcl = self.selectCandidateD(config,sortedDriversAssignments)
+                if(rcl is None):
                     solution.makeInfeasible()
                     break
-
+                candidate = random.choice(rcl)
                 selDrivers.append(candidate)
                 sortedDriversAssignments.remove(candidate)
 
@@ -93,7 +127,7 @@ class Solver_GRASP(Solver):
 
             for i in range(0, len(selDrivers)):
                 solution.assign(selDrivers[i], selBuses[i])
-
+        #print(len(rcl))
         return (solution, iteration_elapsedEvalTime, iteration_evaluatedCandidates)
 
     def solve(self, config, problem):
@@ -133,7 +167,7 @@ class Solver_GRASP(Solver):
                 bestSolution = solution
                 bestCost = solutionCost
                 self.writeLogLine(bestCost, iteration)
-
+            # print(solutionCost, bestCost)
         self.writeLogLine(bestCost, iteration)
 
         avg_evalTimePerCandidate = 0.0

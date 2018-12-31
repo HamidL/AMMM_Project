@@ -27,6 +27,7 @@ def run():
     problem = Problem(inputData)
     print('Problem settings:')
     print("Services: " + str(problem.inputData.nServices) + " Drivers: " + str(problem.inputData.nDrivers) + " Buses: " + str(problem.inputData.nBuses))
+
     if(config.localSearch):
         print("Solver: " + config.solver + " Neighborhood Strategy: " + config.neighborhoodStrategy + " Policy: " + config.policy)
     if (config.solver == 'Greedy'):
@@ -39,6 +40,7 @@ def run():
     # print(solution.driver_to_services)
     # print(solution.bus_to_services)
     # print(solution.worked_minutes)
+    # print(problem.getServices()[102].getMinutes())
     # print(solution.cost)
     # if(problem.checkInstance()):
     #     print 'Solving Problem...'
