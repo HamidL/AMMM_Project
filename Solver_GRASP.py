@@ -156,7 +156,6 @@ class Solver_GRASP(Solver):
 
             # recover original alpha
             if (iteration == 1): config.alpha = originalAlpha
-
             if (not solution.isFeasible()):
                 continue
 
