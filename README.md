@@ -1,12 +1,14 @@
 # AMMM_Project
 ## Prerequisites
 Python version 3.5 is recommended.
+
 NumPy package.
+
 ```
 pip install numpy
 ```
 ## Usefull information
-What things you need to install the software and how to install them
+
 · OPL model execution: The model is located at AMMM_Project/OPL/AMMM.mod, it can be manually executed in CPLEX adding any of the instances previously generated or new ones.
 
 · Python instance generator execution: To use the instance generator, first modify the configuration file, which is located at AMMM_Project/GreedyGRASP/InstanceGenerator/config.txt. An instance can be generated afterwards executing the InstanceGenerator.py file. The generated instance will be available in the data.dat file.
