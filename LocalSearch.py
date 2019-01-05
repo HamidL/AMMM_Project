@@ -134,17 +134,17 @@ class LocalSearch(object):
                         curHighestCost = neighborHighestCost
         return bestNeighbor
 
-    def exploreNeighborhoodDriverE(self, solution, sortedBusAssignments):
+    def exploreNeighborhoodDriverE(self, solution, sortedDriverAssignments):
         curHighestCost = solution.cost
         bestNeighbor = solution
-        for assignment in sortedBusAssignments:
+        for assignment in sortedDriverAssignments:
             curServices, posDrivers = solution.findDriversInOtherServices(assignment.driver)
 
             for posDriver in posDrivers[curServices.index(assignment.service)]:
-                for posBusAssi in solution.getDriverAssignments(posDriver):
-                    newAssignements, neighborHighestCost = solution.evaluateExchange(assignment, posBusAssi)
+                for posDriverAssi in solution.getDriverAssignments(posDriver):
+                    newAssignements, neighborHighestCost = solution.evaluateExchange(assignment, posDriverAssi)
                     if (curHighestCost > neighborHighestCost):
-                        oldAssignements = [assignment, posBusAssi]
+                        oldAssignements = [assignment, posDriverAssi]
                         neighbor = self.createNeighborSolutionDriverE(solution,oldAssignements, newAssignements)
                         if (neighbor is None): continue
                         if (self.policy == 'FirstImprovement'):
