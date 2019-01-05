@@ -2,14 +2,14 @@
 inputDataFile        = data/50S_20D_20B.dat;         # Input DAT file
 solutionFile         = solutions/example.sol; # Output DAT file (solution)
 solver               = GRASP;                 # Supported solvers: Greedy / GRASP
-maxExecTime          = 3600;                    # Maximum execution time in seconds
+maxExecTime          = 60;                    # Maximum execution time in seconds
 
 # --- Greedy specific parameters ------------------------------------------------------------------------------
 # Does not has specific parameters
 
 # --- GRASP specific parameters -------------------------------------------------------------------------------
 # Ignored if solver is not GRASP.
-alpha                = 0.1;                   # Alpha parameter for the GRASP solver.
+alpha                = 0.2;                   # Alpha parameter for the GRASP solver.
 
 # --- Local Search specific parameters ------------------------------------------------------------------------
 # Ignored if solver is not Greedy or GRASP.

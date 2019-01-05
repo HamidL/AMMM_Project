@@ -18,7 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
 import time
-from Logger import Logger
+from GreedyGRASP.Logger import Logger
 
 class Solver(object):
     def __init__(self):

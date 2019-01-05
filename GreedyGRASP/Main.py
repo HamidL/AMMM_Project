@@ -1,14 +1,12 @@
-
-import argparse
 import sys
 
-from DATParser import DATParser
-from ValidateInputData import ValidateInputData
-from ValidateConfig import ValidateConfig
-from Solver_Greedy import Solver_Greedy
-from Solver_GRASP import Solver_GRASP
-from Problem import Problem
-from Solution import Solution
+from GreedyGRASP.DATParser import DATParser
+from GreedyGRASP.ValidateInputData import ValidateInputData
+from GreedyGRASP.ValidateConfig import ValidateConfig
+from GreedyGRASP.Solver_Greedy import Solver_Greedy
+from GreedyGRASP.Solver_GRASP import Solver_GRASP
+from GreedyGRASP.Problem import Problem
+
 
 def run():
     #try:

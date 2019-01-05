@@ -1,7 +1,7 @@
 import numpy as np
-from Driver import Driver
-from Service import Service
-from Bus import Bus
+from GreedyGRASP.Driver import Driver
+from GreedyGRASP.Service import Service
+from GreedyGRASP.Bus import Bus
 
 class Problem(object):
     def __init__(self, inputData):

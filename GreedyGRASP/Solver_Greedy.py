@@ -1,7 +1,7 @@
 
-from Solver import Solver
-from Solution import Solution
-from LocalSearch import LocalSearch
+from GreedyGRASP.Solver import Solver
+from GreedyGRASP.Solution import Solution
+from GreedyGRASP.LocalSearch import LocalSearch
 
 # Inherits from a parent abstract solver.
 class Solver_Greedy(Solver):

@@ -1,8 +1,7 @@
 import random, time
-from Solver import Solver
-from Solution import Solution
-from copy import deepcopy
-from LocalSearch import LocalSearch
+from GreedyGRASP.Solver import Solver
+from GreedyGRASP.Solution import Solution
+from GreedyGRASP.LocalSearch import LocalSearch
 
 
 # Inherits from a parent abstract solver.
