@@ -17,6 +17,8 @@ pip install numpy
 
 * **Greedy/GRASP execution:**  To use the solver, first modify the configuration file, which is located at AMMM_Project/GreedyGRASP/config/config.dat. After it has been configured, the solver can be executed in two ways: executing the AMMM_Project/GreedyGRASP/Main.py file (which will use the configuration specified in the configuration file) or executing the AMMM_Project/GreedyGRASP/AllInOne.py file (which will solve the instance using all the configuration combinations possible).
 
+* **Pregenerted files:**  A set of pregenerated files is available at AMMM_Project/Data.
+
 ## Authors
 
 * **Hamid Latif Martínez** 
